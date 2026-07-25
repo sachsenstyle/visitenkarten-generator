@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visitenkarten-Generator</title>
+<style>
+  :root{
+    --ui-bg:#0f1115; --ui-panel:#171a21; --ui-panel2:#1e222b; --ui-line:#2b303c;
+    --ui-text:#e7e9ee; --ui-dim:#9aa2b1; --ui-acc:#4f8cff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ui-bg);color:var(--ui-text);
+    font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  header{padding:16px 22px;border-bottom:1px solid var(--ui-line);display:flex;
+    align-items:baseline;gap:14px;flex-wrap:wrap}
+  header h1{font-size:17px;margin:0;letter-spacing:.2px}
+  header span{color:var(--ui-dim);font-size:12px}
+  .wrap{display:flex;align-items:flex-start;gap:0;min-height:calc(100vh - 55px)}
+  .side{width:370px;flex:0 0 370px;border-right:1px solid var(--ui-line);
+    padding:16px 18px 60px;height:calc(100vh - 55px);overflow-y:auto}
+  .main{flex:1;padding:26px;display:flex;flex-direction:column;align-items:center;gap:22px;
+    height:calc(100vh - 55px);overflow-y:auto}
+  fieldset{border:1px solid var(--ui-line);border-radius:10px;margin:0 0 14px;padding:12px 12px 14px;
+    background:var(--ui-panel)}
+  legend{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--ui-dim);padding:0 6px}
+  label{display:block;font-size:11px;color:var(--ui-dim);margin:8px 0 3px}
+  input[type=text],input[type=email],input[type=tel],input[type=url],select,textarea{
+    width:100%;background:var(--ui-panel2);border:1px solid var(--ui-line);color:var(--ui-text);
+    border-radius:7px;padding:7px 9px;font:inherit;font-size:13px}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ui-acc)}
+  .row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  .chip{border:1px solid var(--ui-line);background:var(--ui-panel2);color:var(--ui-dim);
+    border-radius:20px;padding:5px 11px;font-size:12px;cursor:pointer;user-select:none}
+  .chip:hover{border-color:#3d4557;color:var(--ui-text)}
+  .chip.on{background:var(--ui-acc);border-color:var(--ui-acc);color:#fff}
+  .vgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
+  .vbtn{border:1px solid var(--ui-line);background:var(--ui-panel2);color:var(--ui-dim);
+    border-radius:8px;padding:8px 9px;font-size:11.5px;cursor:pointer;text-align:left;line-height:1.25}
+  .vbtn b{display:block;color:var(--ui-text);font-size:12px;font-weight:600;margin-bottom:2px}
+  .vbtn.on{border-color:var(--ui-acc);background:rgba(79,140,255,.14)}
+  .vbtn.on b{color:#9dc0ff}
+  .cc{display:flex;align-items:center;gap:8px;margin-top:6px}
+  .cc input[type=color]{width:38px;height:30px;padding:0;border:1px solid var(--ui-line);
+    border-radius:6px;background:none;cursor:pointer}
+  .cc small{color:var(--ui-dim);font-size:11px}
+  .sw{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+  .sw i{width:20px;height:20px;border-radius:5px;cursor:pointer;border:1px solid #ffffff22;display:block}
+  .chk{display:flex;align-items:center;gap:7px;margin-top:9px;color:var(--ui-text);font-size:12.5px;cursor:pointer}
+  .chk input{accent-color:var(--ui-acc);width:15px;height:15px}
+  button.act{width:100%;background:var(--ui-acc);color:#fff;border:0;border-radius:8px;
+    padding:11px;font-size:13.5px;font-weight:600;cursor:pointer;margin-top:8px}
+  button.act:hover{filter:brightness(1.1)}
+  button.act.sec{background:var(--ui-panel2);border:1px solid var(--ui-line);color:var(--ui-text)}
+  .hint{font-size:11px;color:var(--ui-dim);margin-top:8px;line-height:1.5}
+  .stage{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .stage h3{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ui-dim);margin:0}
+  .shadow{box-shadow:0 18px 45px rgba(0,0,0,.55);border-radius:2px}
+  #fileName{font-size:11px;color:var(--ui-dim);margin-top:5px;word-break:break-all}
+  input[type=file]{font-size:11px;color:var(--ui-dim);width:100%}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#222836;
+    border:1px solid var(--ui-line);padding:10px 18px;border-radius:9px;font-size:13px;
+    opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
+  #toast.on{opacity:1}
+
+  /* ============ KARTE ============ */
+  /* 91 x 61 mm inkl. 3mm Beschnitt @ 5px/mm  =>  455 x 305 px */
+  .card{position:relative;width:455px;height:305px;overflow:hidden;background:#fff;
+    --bleed:15px;--acc:#0f4c81;--bg:#ffffff;--ink:#141821;--soft:#5d6674;
+    font-family:var(--ff);color:var(--ink);background:var(--bg)}
+  .card *{box-sizing:border-box}
+  .safe{position:absolute;inset:var(--bleed);display:flex}
+  .trim{position:absolute;inset:var(--bleed);border:1px dashed rgba(255,0,90,.5);
+    pointer-events:none;z-index:50}
+  .card.exporting .trim{display:none}
+  .nm{font-size:22px;font-weight:700;line-height:1.12;letter-spacing:-.01em;margin:0}
+  .nm small{display:block;font-size:10px;font-weight:600;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--acc);margin-top:6px}
+  .fm{font-size:11.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+  .ct{font-size:9.6px;line-height:1.65;color:var(--soft)}
+  .ct div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ct b{font-weight:600;color:var(--acc);display:inline-block;min-width:26px}
+  .rule{height:2px;background:var(--acc);border-radius:2px}
+  .qrbox{background:#fff;padding:5px;border-radius:4px;display:inline-block;line-height:0}
+  .qrbox img{display:block}
+  .logo{object-fit:contain}
+  .avatar{object-fit:cover;border-radius:50%}
+  .slog{font-size:10px;font-style:italic;color:var(--soft)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Visitenkarten-Generator</h1>
+  <span>5 Stile &middot; 10 Varianten &middot; Vorder- &amp; Rückseite &middot; Druck-PDF 85&times;55&nbsp;mm</span>
+</header>
+
+<div class="wrap">
+<div class="side">
+
+  <fieldset>
+    <legend>Kontaktdaten</legend>
+    <div class="row">
+      <div><label>Vorname</label><input type="text" id="f_vorname" value="Ramona"></div>
+      <div><label>Nachname</label><input type="text" id="f_nachname" value="Bergmann"></div>
+    </div>
+    <label>Position / Titel</label><input type="text" id="f_titel" value="Autorin &amp; Investorin">
+    <label>Firma</label><input type="text" id="f_firma" value="Bergmann Media">
+    <label>Straße &amp; Hausnummer</label><input type="text" id="f_strasse" value="Lindenallee 24">
+    <div class="row">
+      <div style="flex:0 0 90px"><label>PLZ</label><input type="text" id="f_plz" value="10115"></div>
+      <div><label>Ort</label><input type="text" id="f_ort" value="Berlin"></div>
+    </div>
+    <div class="row">
+      <div><label>Telefon</label><input type="tel" id="f_tel" value="+49 30 1234567"></div>
+      <div><label>Mobil</label><input type="tel" id="f_mobil" value="+49 170 9876543"></div>
+    </div>
+    <label>E-Mail</label><input type="email" id="f_mail" value="kontakt@bergmann-media.de">
+    <label>Webseite</label><input type="text" id="f_web" value="www.bergmann-media.de">
+    <label>Slogan / Claim (optional)</label><input type="text" id="f_slogan" value="Bücher. Ideen. Wachstum.">
+  </fieldset>
+
+  <fieldset>
+    <legend>1 &middot; Stil / Anlass</legend>
+    <div class="chips" id="styleChips"></div>
+    <div class="hint" id="styleHint"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>2 &middot; Variante (10)</legend>
+    <div class="vgrid" id="varGrid"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>3 &middot; Farbe &amp; Schrift</legend>
+    <label>Akzentfarbe</label>
+    <div class="cc"><input type="color" id="c_acc"><small id="c_acc_t"></small></div>
+    <div class="sw" id="swAcc"></div>
+    <label>Hintergrund</label>
+    <div class="cc"><input type="color" id="c_bg"><small id="c_bg_t"></small></div>
+    <div class="sw" id="swBg"></div>
+    <label>Textfarbe</label>
+    <div class="cc"><input type="color" id="c_ink"><small id="c_ink_t"></small></div>
+    <label>Schriftart</label>
+    <select id="c_font"></select>
+    <label>Schriftgröße Name</label>
+    <input type="range" id="c_size" min="16" max="30" value="22" style="width:100%">
+  </fieldset>
+
+  <fieldset>
+    <legend>4 &middot; Logo / Foto</legend>
+    <input type="file" id="up" accept="image/*">
+    <div id="fileName">Kein Bild geladen</div>
+    <label>Bildgröße</label>
+    <input type="range" id="c_imgsize" min="40" max="150" value="80" style="width:100%">
+    <button class="act sec" id="clearImg" style="margin-top:8px">Bild entfernen</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>5 &middot; QR-Code</legend>
+    <select id="c_qr">
+      <option value="off">Kein QR-Code</option>
+      <option value="web" selected>Webseite</option>
+      <option value="vcard">vCard (alle Kontaktdaten)</option>
+      <option value="mail">E-Mail</option>
+      <option value="tel">Telefon</option>
+    </select>
+    <div class="hint">Die vCard speichert Name, Firma, Adresse, Telefon, Mobil, E-Mail und Web beim Scannen direkt ins Adressbuch.</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>6 &middot; Rückseite</legend>
+    <label class="chk"><input type="checkbox" id="c_back" checked> Rückseite gestalten</label>
+    <label>Motiv</label>
+    <select id="c_backstyle">
+      <option value="logo">Logo / Initialen zentriert</option>
+      <option value="slogan">Slogan auf Farbfläche</option>
+      <option value="qr">Großer QR-Code</option>
+      <option value="contact">Kontaktdaten komplett</option>
+      <option value="plain">Nur Farbfläche</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <legend>7 &middot; Export</legend>
+    <button class="act" id="pdf1">PDF – Einzelkarte (mit Beschnitt)</button>
+    <button class="act sec" id="pdf10">PDF – A4-Druckbogen (10 Karten)</button>
+    <button class="act sec" id="png1">PNG – Vorderseite</button>
+    <label class="chk"><input type="checkbox" id="c_trim" checked> Schnittlinie in Vorschau zeigen</label>
+    <div class="hint">Einzelkarte: 91&times;61&nbsp;mm Seite = 85&times;55&nbsp;mm Endformat + 3&nbsp;mm Beschnitt rundum, 300&nbsp;dpi. Genau so wollen es Druckereien.</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Vorlagen</legend>
+    <button class="act sec" id="saveTpl">Daten speichern (im Browser)</button>
+    <button class="act sec" id="loadTpl">Daten laden</button>
+    <button class="act sec" id="randomize">Zufälliges Design</button>
+  </fieldset>
+
+</div>
+
+<div class="main">
+  <div class="stage">
+    <h3>Vorderseite</h3>
+    <div class="shadow"><div class="card" id="cardFront"></div></div>
+  </div>
+  <div class="stage" id="backStage">
+    <h3>Rückseite</h3>
+    <div class="shadow"><div class="card" id="cardBack"></div></div>
+  </div>
+</div>
+</div>
+
+<div id="qrHolder" style="position:fixed;left:-9999px;top:0"></div>
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* ============================================================
+   KONFIGURATION
+   ============================================================ */
+const FONTS = {
+  sans:    {n:'Modern Sans',    v:'"Helvetica Neue",Helvetica,Arial,sans-serif'},
+  geo:     {n:'Geometrisch',    v:'"Avenir Next","Century Gothic","Futura","Trebuchet MS",sans-serif'},
+  serif:   {n:'Klassisch Serif',v:'Georgia,"Times New Roman",serif'},
+  eleg:    {n:'Elegant Serif',  v:'"Didot","Bodoni MT","Palatino Linotype",Palatino,Garamond,serif'},
+  mono:    {n:'Technisch Mono', v:'"SF Mono",Menlo,Consolas,"Courier New",monospace'},
+  cond:    {n:'Kondensiert',    v:'"Arial Narrow","Helvetica Neue Condensed",Impact,sans-serif'}
+};
+
+const STYLES = {
+  klassisch:    {n:'Klassisch',    acc:'#1c2b45', bg:'#ffffff', ink:'#1a1f2b', font:'serif',
+                 h:'Zurückhaltend, seriös, zeitlos – Notariat, Beratung, Buchbranche.'},
+  professionell:{n:'Professionell',acc:'#0f4c81', bg:'#ffffff', ink:'#171c26', font:'sans',
+                 h:'Klar und sachlich – Business, Finanzen, Investment, B2B.'},
+  sportlich:    {n:'Sportlich',    acc:'#e63946', bg:'#101317', ink:'#f5f7fa', font:'cond',
+                 h:'Kräftig, kontrastreich, dynamisch – Fitness, Events, Startup.'},
+  elegant:      {n:'Elegant',      acc:'#c2a15c', bg:'#14100e', ink:'#f4efe6', font:'eleg',
+                 h:'Dunkel mit Gold – Luxus, Kunst, Gastronomie, Hochzeit.'},
+  alltaeglich:  {n:'Alltäglich',   acc:'#2a9d8f', bg:'#fbfaf7', ink:'#22282e', font:'geo',
+                 h:'Freundlich und warm – Handwerk, Praxis, Kreative, privat.'}
+};
+
+const VARIANTS = [
+  {id:'minimal',  n:'01 Minimal',      d:'Zentriert, viel Weißraum'},
+  {id:'sidebar',  n:'02 Seitenleiste', d:'Farbbalken links, Daten rechts'},
+  {id:'photo',    n:'03 Portraitfoto', d:'Rundes Bild + Kontaktblock'},
+  {id:'logotop',  n:'04 Logo oben',    d:'Branding zentriert, Linie'},
+  {id:'fullcolor',n:'05 Vollfarbe',    d:'Ganze Karte in Akzentfarbe'},
+  {id:'diagonal', n:'06 Diagonal',     d:'Schräger Farbschnitt, modern'},
+  {id:'qrfocus',  n:'07 QR-Fokus',     d:'QR-Spalte rechts, groß'},
+  {id:'band',     n:'08 Branding-Band',d:'Farbband unten mit Logo'},
+  {id:'split',    n:'09 Split-Bild',   d:'Halb Bild / Grafik, halb Text'},
+  {id:'frame',    n:'10 Rahmen',       d:'Feine Outline, Monogramm'}
+];
+
+const SWATCH_ACC = ['#0f4c81','#1c2b45','#e63946','#c2a15c','#2a9d8f','#7b2cbf','#ff7b00','#111111','#0a8754','#d90429'];
+const SWATCH_BG  = ['#ffffff','#fbfaf7','#f2f0eb','#eef2f6','#101317','#14100e','#1b2430','#2b2118','#0d1f1c','#f7e9dd'];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const S = {
+  style:'professionell', variant:'sidebar',
+  acc:'#0f4c81', bg:'#ffffff', ink:'#171c26', font:'sans',
+  size:22, img:null, imgsize:80, qr:'web',
+  back:true, backstyle:'logo', trim:true
+};
+
+const $ = id => document.getElementById(id);
+const esc = s => (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function data(){
+  return {
+    vorname:$('f_vorname').value.trim(), nachname:$('f_nachname').value.trim(),
+    titel:$('f_titel').value.trim(),     firma:$('f_firma').value.trim(),
+    strasse:$('f_strasse').value.trim(), plz:$('f_plz').value.trim(),
+    ort:$('f_ort').value.trim(),         tel:$('f_tel').value.trim(),
+    mobil:$('f_mobil').value.trim(),     mail:$('f_mail').value.trim(),
+    web:$('f_web').value.trim(),         slogan:$('f_slogan').value.trim()
+  };
+}
+const initials = d => ((d.vorname[0]||'')+(d.nachname[0]||'')).toUpperCase();
+function isDark(hex){
+  const c=hex.replace('#',''); const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);
+  return (0.299*r+0.587*g+0.114*b) < 140;
+}
+function mix(hex,pct){ // pct>0 heller, <0 dunkler
+  const c=hex.replace('#',''); let r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);
+  const t = pct>0?255:0, p=Math.abs(pct)/100;
+  r=Math.round(r+(t-r)*p); g=Math.round(g+(t-g)*p); b=Math.round(b+(t-b)*p);
+  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+/* ============================================================
+   QR
+   ============================================================ */
+let qrCache = {key:null,url:null};
+function qrPayload(d){
+  switch(S.qr){
+    case 'web':   return d.web ? (/^https?:/i.test(d.web)?d.web:'https://'+d.web) : '';
+    case 'mail':  return d.mail ? 'mailto:'+d.mail : '';
+    case 'tel':   return d.tel||d.mobil ? 'tel:'+(d.tel||d.mobil).replace(/\s/g,'') : '';
+    case 'vcard': return ['BEGIN:VCARD','VERSION:3.0',
+        'N:'+d.nachname+';'+d.vorname+';;;','FN:'+d.vorname+' '+d.nachname,
+        d.firma?'ORG:'+d.firma:'', d.titel?'TITLE:'+d.titel:'',
+        d.tel?'TEL;TYPE=WORK,VOICE:'+d.tel:'', d.mobil?'TEL;TYPE=CELL:'+d.mobil:'',
+        d.mail?'EMAIL;TYPE=INTERNET:'+d.mail:'',
+        (d.strasse||d.ort)?'ADR;TYPE=WORK:;;'+d.strasse+';'+d.ort+';;'+d.plz+';':'',
+        d.web?'URL:'+d.web:'','END:VCARD'].filter(Boolean).join('\n');
+  }
+  return '';
+}
+function qrDataURL(d){
+  if(S.qr==='off') return null;
+  const txt = qrPayload(d); if(!txt) return null;
+  if(qrCache.key===txt) return qrCache.url;
+  const h = $('qrHolder'); h.innerHTML='';
+  try{
+    new QRCode(h,{text:txt,width:320,height:320,colorDark:'#000000',colorLight:'#ffffff',
+      correctLevel:QRCode.CorrectLevel.M});
+    const cv = h.querySelector('canvas');
+    const url = cv ? cv.toDataURL('image/png') : (h.querySelector('img')||{}).src;
+    qrCache = {key:txt,url}; return url;
+  }catch(e){ return null; }
+}
+
+/* ============================================================
+   BAUSTEINE
+   ============================================================ */
+function bName(d,al='left'){
+  return `<div class="nm" style="text-align:${al}">${esc(d.vorname)}${d.vorname&&d.nachname?' ':''}${esc(d.nachname)}
+    ${d.titel?`<small>${esc(d.titel)}</small>`:''}</div>`;
+}
+function bFirma(d,al='left'){ return d.firma?`<div class="fm" style="text-align:${al};color:var(--acc)">${esc(d.firma)}</div>`:''; }
+function bContact(d,al='left',showAll=true){
+  const L=[];
+  if(d.strasse) L.push(`<div>${esc(d.strasse)}</div>`);
+  if(d.plz||d.ort) L.push(`<div>${esc(d.plz)} ${esc(d.ort)}</div>`);
+  if(showAll){
+    if(d.tel)   L.push(`<div><b>Tel</b> ${esc(d.tel)}</div>`);
+    if(d.mobil) L.push(`<div><b>Mob</b> ${esc(d.mobil)}</div>`);
+    if(d.mail)  L.push(`<div><b>Mail</b> ${esc(d.mail)}</div>`);
+    if(d.web)   L.push(`<div><b>Web</b> ${esc(d.web)}</div>`);
+  }
+  return `<div class="ct" style="text-align:${al}">${L.join('')}</div>`;
+}
+function bQR(d,px=58){
+  const u = qrDataURL(d); if(!u) return '';
+  return `<div class="qrbox"><img src="${u}" style="width:${px}px;height:${px}px"></div>`;
+}
+function bImg(d,size,round){
+  if(S.img) return `<img src="${S.img}" class="${round?'avatar':'logo'}" style="width:${size}px;height:${size}px">`;
+  // Fallback: Monogramm-Grafik
+  return `<div style="width:${size}px;height:${size}px;border-radius:${round?'50%':'8px'};
+    background:var(--acc);color:${isDark(S.acc)?'#fff':'#000'};display:flex;align-items:center;
+    justify-content:center;font-size:${Math.round(size*0.38)}px;font-weight:700;letter-spacing:.04em">${esc(initials(d))}</div>`;
+}
+
+/* ============================================================
+   10 VARIANTEN – VORDERSEITE
+   ============================================================ */
+const RENDER = {
+
+minimal(d){ return `<div class="safe" style="flex-direction:column;align-items:center;justify-content:center;padding:0 34px;text-align:center">
+    ${bFirma(d,'center')}
+    <div style="height:14px"></div>
+    ${bName(d,'center')}
+    <div class="rule" style="width:44px;margin:14px 0"></div>
+    ${bContact(d,'center')}
+    ${S.qr!=='off'?`<div style="margin-top:11px">${bQR(d,46)}</div>`:''}
+  </div>`;},
+
+sidebar(d){ return `
+  <div style="position:absolute;left:0;top:0;bottom:0;width:calc(var(--bleed) + 108px);background:var(--acc)"></div>
+  <div style="position:absolute;left:var(--bleed);top:var(--bleed);bottom:var(--bleed);width:108px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#fff">
+    ${bImg(d,Math.min(S.imgsize,76),false)}
+    ${d.firma?`<div style="font-size:9.4px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+      text-align:center;color:${isDark(S.acc)?'#ffffff':'#101317'};padding:0 8px;line-height:1.4">${esc(d.firma)}</div>`:''}
+  </div>
+  <div class="safe" style="left:calc(var(--bleed) + 124px);flex-direction:column;justify-content:center;gap:12px">
+    ${bName(d)}
+    <div class="rule" style="width:34px"></div>
+    ${bContact(d)}
+  </div>
+  ${S.qr!=='off'?`<div style="position:absolute;right:var(--bleed);bottom:var(--bleed)">${bQR(d,48)}</div>`:''}`;},
+
+photo(d){ return `<div class="safe" style="align-items:center;gap:18px">
+    <div style="flex:0 0 auto">${bImg(d,Math.min(S.imgsize+20,118),true)}</div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:9px;min-width:0">
+      ${bFirma(d)}
+      ${bName(d)}
+      <div class="rule" style="width:30px"></div>
+      ${bContact(d)}
+    </div>
+    ${S.qr!=='off'?`<div style="flex:0 0 auto;align-self:flex-end">${bQR(d,50)}</div>`:''}
+  </div>`;},
+
+logotop(d){ return `
+  <div style="position:absolute;left:0;right:0;top:0;height:calc(var(--bleed) + 6px);background:var(--acc)"></div>
+  <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:8px;padding-top:8px">
+    ${bImg(d,Math.min(S.imgsize,64),false)}
+    ${bFirma(d,'center')}
+    <div style="height:2px"></div>
+    ${bName(d,'center')}
+    <div style="width:100%;height:1px;background:var(--acc);opacity:.35;margin:8px 0 2px"></div>
+    <div style="display:flex;align-items:center;gap:14px;width:100%;justify-content:center">
+      ${bContact(d,'center')}
+      ${S.qr!=='off'?bQR(d,44):''}
+    </div>
+  </div>`;},
+
+fullcolor(d){
+  const fg = isDark(S.acc)?'#ffffff':'#101317';
+  return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
+  <div style="position:absolute;right:-40px;bottom:-60px;width:210px;height:210px;border-radius:50%;
+    background:${isDark(S.acc)?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)'}"></div>
+  <div class="safe" style="flex-direction:column;justify-content:space-between;color:${fg}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div class="fm" style="color:${fg};opacity:.85">${esc(d.firma)}</div>
+        <div style="height:12px"></div>
+        <div class="nm" style="color:${fg}">${esc(d.vorname)} ${esc(d.nachname)}
+          ${d.titel?`<small style="color:${fg};opacity:.8">${esc(d.titel)}</small>`:''}</div>
+      </div>
+      ${S.img?`<img src="${S.img}" style="width:${Math.min(S.imgsize,58)}px;height:${Math.min(S.imgsize,58)}px;object-fit:contain">`:''}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
+      <div class="ct" style="color:${fg};opacity:.92">
+        ${d.strasse?`<div>${esc(d.strasse)}</div>`:''}
+        ${(d.plz||d.ort)?`<div>${esc(d.plz)} ${esc(d.ort)}</div>`:''}
+        ${d.tel?`<div>T ${esc(d.tel)}</div>`:''}
+        ${d.mobil?`<div>M ${esc(d.mobil)}</div>`:''}
+        ${d.mail?`<div>${esc(d.mail)}</div>`:''}
+        ${d.web?`<div>${esc(d.web)}</div>`:''}
+      </div>
+      ${S.qr!=='off'?bQR(d,52):''}
+    </div>
+  </div>`;},
+
+diagonal(d){
+  const fg = isDark(S.acc)?'#ffffff':'#101317';
+  return `<div style="position:absolute;left:-60px;top:-150px;width:340px;height:420px;background:var(--acc);
+    transform:rotate(22deg);transform-origin:center"></div>
+  <div style="position:absolute;left:-70px;top:-130px;width:340px;height:420px;
+    background:${isDark(S.acc)?'rgba(255,255,255,.10)':'rgba(0,0,0,.10)'};transform:rotate(22deg)"></div>
+  <div class="safe" style="flex-direction:column;justify-content:space-between">
+    <div style="color:${fg};max-width:190px">
+      <div class="fm" style="color:${fg}">${esc(d.firma)}</div>
+      <div style="height:9px"></div>
+      <div class="nm" style="color:${fg}">${esc(d.vorname)} ${esc(d.nachname)}
+        ${d.titel?`<small style="color:${fg};opacity:.85">${esc(d.titel)}</small>`:''}</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;align-items:flex-end;gap:12px">
+      ${bContact(d,'right')}
+      ${S.qr!=='off'?bQR(d,50):''}
+    </div>
+  </div>`;},
+
+qrfocus(d){ return `
+  <div style="position:absolute;right:0;top:0;bottom:0;width:calc(var(--bleed) + 128px);background:var(--acc)"></div>
+  <div style="position:absolute;right:var(--bleed);top:var(--bleed);bottom:var(--bleed);width:128px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px">
+    ${S.qr!=='off'?bQR(d,86):bImg(d,86,false)}
+    <div style="font-size:8px;letter-spacing:.15em;text-transform:uppercase;
+      color:${isDark(S.acc)?'#ffffffcc':'#101317cc'}">Scannen &amp; speichern</div>
+  </div>
+  <div class="safe" style="right:calc(var(--bleed) + 144px);flex-direction:column;justify-content:center;gap:11px">
+    ${bFirma(d)}
+    ${bName(d)}
+    <div class="rule" style="width:30px"></div>
+    ${bContact(d)}
+  </div>`;},
+
+band(d){
+  const fg = isDark(S.acc)?'#ffffff':'#101317';
+  return `<div style="position:absolute;left:0;right:0;bottom:0;height:calc(var(--bleed) + 74px);background:var(--acc)"></div>
+  <div class="safe" style="bottom:calc(var(--bleed) + 74px);flex-direction:column;justify-content:center;gap:10px">
+    ${bFirma(d)}
+    ${bName(d)}
+    ${d.slogan?`<div class="slog">${esc(d.slogan)}</div>`:''}
+  </div>
+  <div style="position:absolute;left:var(--bleed);right:var(--bleed);bottom:var(--bleed);height:60px;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;color:${fg}">
+    ${bImg(d,52,false)}
+    <div class="ct" style="color:${fg};text-align:right;flex:1">
+      ${d.strasse?`<div>${esc(d.strasse)}, ${esc(d.plz)} ${esc(d.ort)}</div>`:''}
+      ${d.tel?`<div>T ${esc(d.tel)}${d.mobil?' &nbsp;·&nbsp; M '+esc(d.mobil):''}</div>`:''}
+      ${d.mail?`<div>${esc(d.mail)}</div>`:''}
+      ${d.web?`<div>${esc(d.web)}</div>`:''}
+    </div>
+    ${S.qr!=='off'?bQR(d,50):''}
+  </div>`;},
+
+split(d){
+  const fg = isDark(S.acc)?'#ffffff':'#101317';
+  return `
+  <div style="position:absolute;right:0;top:0;bottom:0;width:calc(var(--bleed) + 178px);
+    background:var(--acc);overflow:hidden">
+    ${S.img?`<img src="${S.img}" style="width:100%;height:100%;object-fit:cover">`:`
+      <div style="position:absolute;inset:0">
+        <div style="position:absolute;left:-30px;top:-30px;width:150px;height:150px;border-radius:50%;
+          background:${isDark(S.acc)?'rgba(255,255,255,.12)':'rgba(0,0,0,.12)'}"></div>
+        <div style="position:absolute;right:-40px;bottom:-40px;width:180px;height:180px;border-radius:50%;
+          background:${isDark(S.acc)?'rgba(255,255,255,.08)':'rgba(0,0,0,.08)'}"></div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+          color:${fg};font-size:52px;font-weight:700;letter-spacing:.05em">${esc(initials(d))}</div>
+      </div>`}
+  </div>
+  <div class="safe" style="right:calc(var(--bleed) + 194px);flex-direction:column;justify-content:center;gap:10px">
+    ${bFirma(d)}
+    ${bName(d)}
+    <div class="rule" style="width:28px"></div>
+    ${bContact(d)}
+    ${S.qr!=='off'?`<div style="margin-top:4px">${bQR(d,44)}</div>`:''}
+  </div>`;},
+
+frame(d){ return `
+  <div style="position:absolute;left:calc(var(--bleed) + 8px);top:calc(var(--bleed) + 8px);
+    right:calc(var(--bleed) + 8px);bottom:calc(var(--bleed) + 8px);border:1px solid var(--acc);opacity:.55"></div>
+  <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:0 40px;gap:9px">
+    <div style="width:44px;height:44px;border:1.5px solid var(--acc);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;
+      color:var(--acc);letter-spacing:.04em">${esc(initials(d))}</div>
+    ${bName(d,'center')}
+    ${d.firma?`<div style="font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft)">${esc(d.firma)}</div>`:''}
+    <div style="display:flex;align-items:center;gap:8px;margin:2px 0">
+      <div style="width:26px;height:1px;background:var(--acc);opacity:.6"></div>
+      <div style="width:4px;height:4px;background:var(--acc);transform:rotate(45deg)"></div>
+      <div style="width:26px;height:1px;background:var(--acc);opacity:.6"></div>
+    </div>
+    ${bContact(d,'center')}
+  </div>
+  ${S.qr!=='off'?`<div style="position:absolute;right:calc(var(--bleed) + 14px);bottom:calc(var(--bleed) + 14px)">${bQR(d,40)}</div>`:''}`;}
+};
+
+/* ============================================================
+   RÜCKSEITE
+   ============================================================ */
+function renderBack(d){
+  const fg = isDark(S.acc)?'#ffffff':'#101317';
+  switch(S.backstyle){
+    case 'logo': return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
+      <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:14px;color:${fg}">
+        ${S.img?`<img src="${S.img}" style="width:${Math.min(S.imgsize+30,130)}px;height:${Math.min(S.imgsize+30,130)}px;object-fit:contain">`:
+          `<div style="font-size:56px;font-weight:700;letter-spacing:.08em;color:${fg}">${esc(initials(d))}</div>`}
+        ${d.firma?`<div style="font-size:10.5px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:${fg};opacity:.9">${esc(d.firma)}</div>`:''}
+      </div>`;
+    case 'slogan': return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
+      <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;
+        text-align:center;padding:0 42px;gap:16px;color:${fg}">
+        <div style="font-size:19px;line-height:1.4;font-weight:600">${esc(d.slogan||d.firma)}</div>
+        <div style="width:40px;height:2px;background:${fg};opacity:.6"></div>
+        ${d.web?`<div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.9">${esc(d.web)}</div>`:''}
+      </div>`;
+    case 'qr': return `<div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:12px">
+        ${S.qr!=='off'?bQR(d,140):bImg(d,120,false)}
+        <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)">
+          ${S.qr==='vcard'?'Kontakt speichern':'Mehr erfahren'}</div>
+      </div>`;
+    case 'contact': return `
+      <div style="position:absolute;left:0;right:0;top:0;height:calc(var(--bleed) + 5px);background:var(--acc)"></div>
+      <div class="safe" style="flex-direction:column;justify-content:center;gap:9px;padding-left:6px">
+        ${bFirma(d)}
+        <div class="ct" style="font-size:10.5px;line-height:1.9">
+          ${d.strasse?`<div><b>Adr</b> ${esc(d.strasse)}, ${esc(d.plz)} ${esc(d.ort)}</div>`:''}
+          ${d.tel?`<div><b>Tel</b> ${esc(d.tel)}</div>`:''}
+          ${d.mobil?`<div><b>Mob</b> ${esc(d.mobil)}</div>`:''}
+          ${d.mail?`<div><b>Mail</b> ${esc(d.mail)}</div>`:''}
+          ${d.web?`<div><b>Web</b> ${esc(d.web)}</div>`:''}
+        </div>
+      </div>
+      ${S.qr!=='off'?`<div style="position:absolute;right:calc(var(--bleed) + 4px);bottom:calc(var(--bleed) + 4px)">${bQR(d,60)}</div>`:''}`;
+    default: return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
+      <div style="position:absolute;right:-50px;bottom:-70px;width:230px;height:230px;border-radius:50%;
+        background:${isDark(S.acc)?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)'}"></div>`;
+  }
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function applyVars(el){
+  el.style.setProperty('--acc',S.acc);
+  el.style.setProperty('--bg',S.bg);
+  el.style.setProperty('--ink',S.ink);
+  el.style.setProperty('--soft',isDark(S.bg)?mix(S.ink,-28):mix(S.ink,42));
+  el.style.setProperty('--ff',FONTS[S.font].v);
+  el.style.background = S.bg; el.style.color = S.ink;
+}
+function render(){
+  const d = data();
+  const f = $('cardFront');
+  applyVars(f);
+  f.innerHTML = (RENDER[S.variant]||RENDER.minimal)(d) + (S.trim?'<div class="trim"></div>':'');
+  f.querySelectorAll('.nm').forEach(n=>n.style.fontSize=S.size+'px');
+
+  $('backStage').style.display = S.back?'flex':'none';
+  if(S.back){
+    const b = $('cardBack'); applyVars(b);
+    b.innerHTML = renderBack(d) + (S.trim?'<div class="trim"></div>':'');
+  }
+}
+
+/* ============================================================
+   UI AUFBAU
+   ============================================================ */
+$('styleChips').innerHTML = Object.entries(STYLES)
+  .map(([k,v])=>`<div class="chip" data-s="${k}">${v.n}</div>`).join('');
+$('varGrid').innerHTML = VARIANTS
+  .map(v=>`<div class="vbtn" data-v="${v.id}"><b>${v.n}</b>${v.d}</div>`).join('');
+$('c_font').innerHTML = Object.entries(FONTS).map(([k,v])=>`<option value="${k}">${v.n}</option>`).join('');
+$('swAcc').innerHTML = SWATCH_ACC.map(c=>`<i data-t="acc" style="background:${c}" title="${c}"></i>`).join('');
+$('swBg').innerHTML  = SWATCH_BG.map(c=>`<i data-t="bg" style="background:${c}" title="${c}"></i>`).join('');
+
+function applyStyle(k){
+  const st = STYLES[k]; S.style=k;
+  S.acc=st.acc; S.bg=st.bg; S.ink=st.ink; S.font=st.font;
+  $('styleHint').textContent = st.h;
+  syncControls(); render();
+}
+function syncControls(){
+  document.querySelectorAll('#styleChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===S.style));
+  document.querySelectorAll('#varGrid .vbtn').forEach(c=>c.classList.toggle('on',c.dataset.v===S.variant));
+  $('c_acc').value=S.acc; $('c_bg').value=S.bg; $('c_ink').value=S.ink;
+  $('c_acc_t').textContent=S.acc; $('c_bg_t').textContent=S.bg; $('c_ink_t').textContent=S.ink;
+  $('c_font').value=S.font; $('c_size').value=S.size; $('c_imgsize').value=S.imgsize;
+  $('c_qr').value=S.qr; $('c_back').checked=S.back; $('c_backstyle').value=S.backstyle;
+  $('c_trim').checked=S.trim;
+}
+
+$('styleChips').onclick = e => { const t=e.target.closest('.chip'); if(t) applyStyle(t.dataset.s); };
+$('varGrid').onclick    = e => { const t=e.target.closest('.vbtn'); if(t){ S.variant=t.dataset.v; syncControls(); render(); } };
+$('swAcc').onclick = e => { if(e.target.dataset.t){ S.acc=e.target.title; syncControls(); render(); } };
+$('swBg').onclick  = e => { if(e.target.dataset.t){ S.bg=e.target.title; S.ink=isDark(S.bg)?'#f4f6fa':'#171c26'; syncControls(); render(); } };
+
+['c_acc','c_bg','c_ink'].forEach(id=>$(id).oninput = e=>{
+  S[id.slice(2)] = e.target.value; syncControls(); render(); });
+$('c_font').onchange  = e=>{ S.font=e.target.value; render(); };
+$('c_size').oninput   = e=>{ S.size=+e.target.value; render(); };
+$('c_imgsize').oninput= e=>{ S.imgsize=+e.target.value; render(); };
+$('c_qr').onchange    = e=>{ S.qr=e.target.value; render(); };
+$('c_back').onchange  = e=>{ S.back=e.target.checked; render(); };
+$('c_backstyle').onchange = e=>{ S.backstyle=e.target.value; render(); };
+$('c_trim').onchange  = e=>{ S.trim=e.target.checked; render(); };
+
+document.querySelectorAll('.side input[type=text],.side input[type=email],.side input[type=tel]')
+  .forEach(i=>i.oninput = render);
+
+$('up').onchange = e=>{
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = ev => { S.img = ev.target.result; $('fileName').textContent = file.name; render(); };
+  r.readAsDataURL(file);
+};
+$('clearImg').onclick = ()=>{ S.img=null; $('up').value=''; $('fileName').textContent='Kein Bild geladen'; render(); };
+
+$('randomize').onclick = ()=>{
+  const sk = Object.keys(STYLES), vk = VARIANTS.map(v=>v.id);
+  S.variant = vk[Math.floor(Math.random()*vk.length)];
+  applyStyle(sk[Math.floor(Math.random()*sk.length)]);
+};
+
+/* Speichern / Laden */
+$('saveTpl').onclick = ()=>{
+  try{ localStorage.setItem('vk_data', JSON.stringify({d:data(),s:S}));
+       toast('Gespeichert'); }catch(e){ toast('Speichern nicht möglich'); }
+};
+$('loadTpl').onclick = ()=>{
+  try{
+    const raw = localStorage.getItem('vk_data'); if(!raw) return toast('Nichts gespeichert');
+    const o = JSON.parse(raw);
+    const map={vorname:'f_vorname',nachname:'f_nachname',titel:'f_titel',firma:'f_firma',
+      strasse:'f_strasse',plz:'f_plz',ort:'f_ort',tel:'f_tel',mobil:'f_mobil',
+      mail:'f_mail',web:'f_web',slogan:'f_slogan'};
+    Object.entries(map).forEach(([k,id])=>{ if(o.d[k]!==undefined) $(id).value=o.d[k]; });
+    Object.assign(S,o.s); $('styleHint').textContent=STYLES[S.style]?.h||'';
+    syncControls(); render(); toast('Geladen');
+  }catch(e){ toast('Laden fehlgeschlagen'); }
+};
+
+let tt;
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('on');
+  clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),1800); }
+
+/* ============================================================
+   EXPORT
+   ============================================================ */
+const SCALE = 6;               // 455px * 6 = 2730px auf 91mm -> weit über 300 dpi
+function ready(needPdf){
+  if(typeof html2canvas==='undefined' || (needPdf && !window.jspdf)){
+    toast('Export-Bibliotheken nicht geladen – bitte einmal mit Internetverbindung öffnen.');
+    return false;
+  }
+  return true;
+}
+async function shoot(el){
+  el.classList.add('exporting');
+  const cv = await html2canvas(el,{scale:SCALE,backgroundColor:null,logging:false,useCORS:true});
+  el.classList.remove('exporting');
+  return cv.toDataURL('image/png');
+}
+/* Aufnahme ohne Beschnitt: exakt 85x55 mm (425x275 px) – für den A4-Bogen */
+async function shootTrim(el){
+  const w=el.style.width, h=el.style.height, b=el.style.getPropertyValue('--bleed');
+  el.style.width='425px'; el.style.height='275px'; el.style.setProperty('--bleed','0px');
+  const url = await shoot(el);
+  el.style.width=w; el.style.height=h;
+  if(b) el.style.setProperty('--bleed',b); else el.style.removeProperty('--bleed');
+  return url;
+}
+function fname(ext){
+  const d=data(); const n=(d.vorname+'-'+d.nachname).replace(/[^a-z0-9\-]/gi,'')||'visitenkarte';
+  return 'visitenkarte-'+n.toLowerCase()+'.'+ext;
+}
+
+$('png1').onclick = async ()=>{
+  if(!ready(false)) return;
+  toast('PNG wird erstellt …');
+  const url = await shoot($('cardFront'));
+  const a=document.createElement('a'); a.href=url; a.download=fname('png'); a.click();
+  toast('PNG gespeichert');
+};
+
+$('pdf1').onclick = async ()=>{
+  if(!ready(true)) return;
+  toast('PDF wird erstellt …');
+  const {jsPDF} = window.jspdf;
+  const pdf = new jsPDF({orientation:'landscape',unit:'mm',format:[91,61]});
+  pdf.addImage(await shoot($('cardFront')),'PNG',0,0,91,61,undefined,'FAST');
+  if(S.back){ pdf.addPage([91,61],'landscape');
+    pdf.addImage(await shoot($('cardBack')),'PNG',0,0,91,61,undefined,'FAST'); }
+  pdf.save(fname('pdf'));
+  toast('PDF gespeichert – 85×55 mm + 3 mm Beschnitt');
+};
+
+$('pdf10').onclick = async ()=>{
+  if(!ready(true)) return;
+  toast('Druckbogen wird erstellt …');
+  const {jsPDF} = window.jspdf;
+  const pdf = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=85,H=55, cols=2, rows=5;
+  const ox = (210-cols*W)/2, oy = (297-rows*H)/2;
+  const place = (img)=>{
+    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++)
+      pdf.addImage(img,'PNG',ox+c*W,oy+r*H,W,H,undefined,'FAST');
+    pdf.setDrawColor(160); pdf.setLineWidth(0.08);
+    for(let r=0;r<=rows;r++){ const y=oy+r*H; pdf.line(8,y,202,y); }
+    for(let c=0;c<=cols;c++){ const x=ox+c*W; pdf.line(x,8,x,289); }
+  };
+  place(await shootTrim($('cardFront')));
+  if(S.back){ pdf.addPage('a4','portrait'); place(await shootTrim($('cardBack'))); }
+  pdf.save('visitenkarten-a4-bogen.pdf');
+  toast('A4-Bogen gespeichert (10 Karten, Schnittlinien)');
+};
+
+/* ============================================================
+   START
+   ============================================================ */
+applyStyle('professionell');
+S.variant='sidebar'; syncControls(); render();
+</script>
+</body>
+</html>
