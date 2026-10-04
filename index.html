@@ -93,7 +93,7 @@
 
 <header>
   <h1>Visitenkarten-Generator</h1>
-  <span>5 Stile &middot; 10 Varianten &middot; Vorder- &amp; Rückseite &middot; Druck-PDF 85&times;55&nbsp;mm</span>
+  <span>5 Stile &middot; 10 Varianten &middot; frei anpassbar &middot; Vorder- &amp; Rückseite &middot; Druck-PDF 85&times;55&nbsp;mm</span>
 </header>
 
 <div class="wrap">
@@ -102,27 +102,38 @@
   <fieldset>
     <legend>Kontaktdaten</legend>
     <div class="row">
-      <div><label>Vorname</label><input type="text" id="f_vorname" value="Ramona"></div>
-      <div><label>Nachname</label><input type="text" id="f_nachname" value="Bergmann"></div>
+      <div><label>Vorname</label><input type="text" id="f_vorname" placeholder="z. B. Anna"></div>
+      <div><label>Nachname</label><input type="text" id="f_nachname" placeholder="z. B. Muster"></div>
     </div>
-    <label>Position / Titel</label><input type="text" id="f_titel" value="Autorin &amp; Investorin">
-    <label>Firma</label><input type="text" id="f_firma" value="Bergmann Media">
-    <label>Straße &amp; Hausnummer</label><input type="text" id="f_strasse" value="Lindenallee 24">
+    <label>Position / Titel</label><input type="text" id="f_titel" placeholder="z. B. Autorin">
+    <label>Firma</label><input type="text" id="f_firma" placeholder="Firmen- oder Markenname">
+    <label>Straße &amp; Hausnummer</label><input type="text" id="f_strasse" placeholder="Straße Nr.">
     <div class="row">
-      <div style="flex:0 0 90px"><label>PLZ</label><input type="text" id="f_plz" value="10115"></div>
-      <div><label>Ort</label><input type="text" id="f_ort" value="Berlin"></div>
+      <div style="flex:0 0 90px"><label>PLZ</label><input type="text" id="f_plz" placeholder="PLZ"></div>
+      <div><label>Ort</label><input type="text" id="f_ort" placeholder="Ort"></div>
     </div>
     <div class="row">
-      <div><label>Telefon</label><input type="tel" id="f_tel" value="+49 30 1234567"></div>
-      <div><label>Mobil</label><input type="tel" id="f_mobil" value="+49 170 9876543"></div>
+      <div><label>Telefon</label><input type="tel" id="f_tel" placeholder="optional"></div>
+      <div><label>Mobil</label><input type="tel" id="f_mobil" placeholder="optional"></div>
     </div>
-    <label>E-Mail</label><input type="email" id="f_mail" value="kontakt@bergmann-media.de">
-    <label>Webseite</label><input type="text" id="f_web" value="www.bergmann-media.de">
-    <label>Slogan / Claim (optional)</label><input type="text" id="f_slogan" value="Bücher. Ideen. Wachstum.">
+    <label>E-Mail</label><input type="email" id="f_mail" placeholder="name@beispiel.de">
+    <label>Webseite</label><input type="text" id="f_web" placeholder="www.beispiel.de">
+    <label>Slogan / Claim (optional)</label><input type="text" id="f_slogan" placeholder="optional">
   </fieldset>
 
   <fieldset>
-    <legend>1 &middot; Stil / Anlass</legend>
+    <legend>Was soll auf die Karte?</legend>
+    <label class="chk"><input type="checkbox" class="shw" data-k="titel" checked> Position / Titel</label>
+    <label class="chk"><input type="checkbox" class="shw" data-k="firma" checked> Firma</label>
+    <label class="chk"><input type="checkbox" class="shw" data-k="adresse" checked> Adresse</label>
+    <label class="chk"><input type="checkbox" class="shw" data-k="tel" checked> Telefon &amp; Mobil</label>
+    <label class="chk"><input type="checkbox" class="shw" data-k="mail" checked> E-Mail</label>
+    <label class="chk"><input type="checkbox" class="shw" data-k="web" checked> Webseite</label>
+    <label class="chk"><input type="checkbox" class="shw" data-k="slogan" checked> Slogan</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>1 &middot; Stil / Anlass (nur als Startpunkt)</legend>
     <div class="chips" id="styleChips"></div>
     <div class="hint" id="styleHint"></div>
   </fieldset>
@@ -145,15 +156,18 @@
     <label>Schriftart</label>
     <select id="c_font"></select>
     <label>Schriftgröße Name</label>
-    <input type="range" id="c_size" min="16" max="30" value="22" style="width:100%">
+    <input type="range" id="c_size" min="14" max="32" value="22" style="width:100%">
+    <label>Schriftgröße Kontaktdaten</label>
+    <input type="range" id="c_ctsize" min="7" max="13" step="0.2" value="9.6" style="width:100%">
   </fieldset>
 
   <fieldset>
     <legend>4 &middot; Logo / Foto</legend>
     <input type="file" id="up" accept="image/*">
     <div id="fileName">Kein Bild geladen</div>
-    <label>Bildgröße</label>
-    <input type="range" id="c_imgsize" min="40" max="150" value="80" style="width:100%">
+    <label class="chk"><input type="checkbox" id="c_nowhite"> Weißen Hintergrund vom Logo entfernen</label>
+    <label>Bildgröße Vorderseite</label>
+    <input type="range" id="c_imgsize" min="30" max="150" value="80" style="width:100%">
     <button class="act sec" id="clearImg" style="margin-top:8px">Bild entfernen</button>
   </fieldset>
 
@@ -180,6 +194,12 @@
       <option value="contact">Kontaktdaten komplett</option>
       <option value="plain">Nur Farbfläche</option>
     </select>
+    <label>Hintergrund Rückseite</label>
+    <div class="cc"><input type="color" id="c_backbg"><small id="c_backbg_t"></small></div>
+    <div class="sw" id="swBack"></div>
+    <button class="act sec" id="backAcc" style="margin-top:6px">Wie Akzentfarbe</button>
+    <label>Bildgröße Rückseite</label>
+    <input type="range" id="c_backimg" min="50" max="230" value="110" style="width:100%">
   </fieldset>
 
   <fieldset>
@@ -196,6 +216,8 @@
     <button class="act sec" id="saveTpl">Daten speichern (im Browser)</button>
     <button class="act sec" id="loadTpl">Daten laden</button>
     <button class="act sec" id="randomize">Zufälliges Design</button>
+    <button class="act sec" id="resetAll">Alles leeren &amp; neu anfangen</button>
+    <div class="hint">Deine Eingaben werden automatisch im Browser gemerkt.</div>
   </fieldset>
 
 </div>
@@ -264,11 +286,13 @@ const SWATCH_BG  = ['#ffffff','#fbfaf7','#f2f0eb','#eef2f6','#101317','#14100e',
    STATE
    ============================================================ */
 const S = {
-  style:'professionell', variant:'sidebar',
-  acc:'#0f4c81', bg:'#ffffff', ink:'#171c26', font:'sans',
-  size:22, img:null, imgsize:80, qr:'web',
-  back:true, backstyle:'logo', trim:true
+  style:null, variant:'minimal',
+  acc:'#1c2b45', bg:'#ffffff', ink:'#171c26', font:'sans',
+  size:22, ctsize:9.6, img:null, imgRaw:null, nowhite:false, imgsize:80, qr:'web',
+  back:true, backstyle:'logo', backbg:null, backimg:110, trim:true,
+  show:{titel:true,firma:true,adresse:true,tel:true,mail:true,web:true,slogan:true}
 };
+const DEFAULT_S = JSON.parse(JSON.stringify(S));
 
 const $ = id => document.getElementById(id);
 const esc = s => (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -282,6 +306,14 @@ function data(){
     mobil:$('f_mobil').value.trim(),     mail:$('f_mail').value.trim(),
     web:$('f_web').value.trim(),         slogan:$('f_slogan').value.trim()
   };
+}
+function view(){
+  const d = data(), sh = S.show;
+  if(!sh.titel) d.titel=''; if(!sh.firma) d.firma='';
+  if(!sh.adresse){ d.strasse=''; d.plz=''; d.ort=''; }
+  if(!sh.tel){ d.tel=''; d.mobil=''; }
+  if(!sh.mail) d.mail=''; if(!sh.web) d.web=''; if(!sh.slogan) d.slogan='';
+  return d;
 }
 const initials = d => ((d.vorname[0]||'')+(d.nachname[0]||'')).toUpperCase();
 function isDark(hex){
@@ -349,7 +381,7 @@ function bContact(d,al='left',showAll=true){
   return `<div class="ct" style="text-align:${al}">${L.join('')}</div>`;
 }
 function bQR(d,px=58){
-  const u = qrDataURL(d); if(!u) return '';
+  const u = qrDataURL(data()); if(!u) return '';
   return `<div class="qrbox"><img src="${u}" style="width:${px}px;height:${px}px"></div>`;
 }
 function bImg(d,size,round){
@@ -379,8 +411,8 @@ sidebar(d){ return `
   <div style="position:absolute;left:var(--bleed);top:var(--bleed);bottom:var(--bleed);width:108px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#fff">
     ${bImg(d,Math.min(S.imgsize,76),false)}
-    ${d.firma?`<div style="font-size:9.4px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
-      text-align:center;color:${isDark(S.acc)?'#ffffff':'#101317'};padding:0 8px;line-height:1.4">${esc(d.firma)}</div>`:''}
+    ${d.firma?`<div style="font-size:${Math.max(5.5,Math.min(9.4,92/(Math.max(...d.firma.split(' ').map(w=>w.length))*0.86)))}px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      text-align:center;color:${isDark(S.acc)?'#ffffff':'#101317'};padding:0 4px;line-height:1.35;overflow-wrap:anywhere;width:100%">${esc(d.firma)}</div>`:''}
   </div>
   <div class="safe" style="left:calc(var(--bleed) + 124px);flex-direction:column;justify-content:center;gap:12px">
     ${bName(d)}
@@ -543,27 +575,28 @@ frame(d){ return `
    RÜCKSEITE
    ============================================================ */
 function renderBack(d){
-  const fg = isDark(S.acc)?'#ffffff':'#101317';
+  const bb = S.backbg || S.acc;
+  const fg = isDark(bb)?'#ffffff':'#101317';
   switch(S.backstyle){
-    case 'logo': return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
+    case 'logo': return `<div style="position:absolute;inset:0;background:${bb}"></div>
       <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:14px;color:${fg}">
-        ${S.img?`<img src="${S.img}" style="width:${Math.min(S.imgsize+30,130)}px;height:${Math.min(S.imgsize+30,130)}px;object-fit:contain">`:
+        ${S.img?`<img src="${S.img}" style="width:${S.backimg*1.6}px;max-width:100%;height:${S.backimg}px;object-fit:contain">`:
           `<div style="font-size:56px;font-weight:700;letter-spacing:.08em;color:${fg}">${esc(initials(d))}</div>`}
         ${d.firma?`<div style="font-size:10.5px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:${fg};opacity:.9">${esc(d.firma)}</div>`:''}
       </div>`;
-    case 'slogan': return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
+    case 'slogan': return `<div style="position:absolute;inset:0;background:${bb}"></div>
       <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;
         text-align:center;padding:0 42px;gap:16px;color:${fg}">
         <div style="font-size:19px;line-height:1.4;font-weight:600">${esc(d.slogan||d.firma)}</div>
         <div style="width:40px;height:2px;background:${fg};opacity:.6"></div>
         ${d.web?`<div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.9">${esc(d.web)}</div>`:''}
       </div>`;
-    case 'qr': return `<div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:12px">
+    case 'qr': return `<div style="position:absolute;inset:0;background:${S.backbg||S.bg}"></div><div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:12px">
         ${S.qr!=='off'?bQR(d,140):bImg(d,120,false)}
         <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)">
           ${S.qr==='vcard'?'Kontakt speichern':'Mehr erfahren'}</div>
       </div>`;
-    case 'contact': return `
+    case 'contact': return `<div style="position:absolute;inset:0;background:${S.backbg||S.bg}"></div>
       <div style="position:absolute;left:0;right:0;top:0;height:calc(var(--bleed) + 5px);background:var(--acc)"></div>
       <div class="safe" style="flex-direction:column;justify-content:center;gap:9px;padding-left:6px">
         ${bFirma(d)}
@@ -576,9 +609,9 @@ function renderBack(d){
         </div>
       </div>
       ${S.qr!=='off'?`<div style="position:absolute;right:calc(var(--bleed) + 4px);bottom:calc(var(--bleed) + 4px)">${bQR(d,60)}</div>`:''}`;
-    default: return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
+    default: return `<div style="position:absolute;inset:0;background:${bb}"></div>
       <div style="position:absolute;right:-50px;bottom:-70px;width:230px;height:230px;border-radius:50%;
-        background:${isDark(S.acc)?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)'}"></div>`;
+        background:${isDark(bb)?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)'}"></div>`;
   }
 }
 
@@ -594,17 +627,22 @@ function applyVars(el){
   el.style.background = S.bg; el.style.color = S.ink;
 }
 function render(){
-  const d = data();
+  const d = view();
   const f = $('cardFront');
   applyVars(f);
   f.innerHTML = (RENDER[S.variant]||RENDER.minimal)(d) + (S.trim?'<div class="trim"></div>':'');
   f.querySelectorAll('.nm').forEach(n=>n.style.fontSize=S.size+'px');
+  f.querySelectorAll('.ct').forEach(n=>n.style.fontSize=S.ctsize+'px');
+  if(!d.vorname && !d.nachname && !d.firma && !S.img)
+    f.insertAdjacentHTML('beforeend','<div class="trim" style="border:0;display:flex;align-items:center;justify-content:center;color:#9aa2b1;font:13px sans-serif">Links deine Daten eingeben</div>');
 
   $('backStage').style.display = S.back?'flex':'none';
   if(S.back){
     const b = $('cardBack'); applyVars(b);
     b.innerHTML = renderBack(d) + (S.trim?'<div class="trim"></div>':'');
+    b.querySelectorAll('.ct').forEach(n=>n.style.fontSize=(S.ctsize+0.9)+'px');
   }
+  autosave();
 }
 
 /* ============================================================
@@ -617,6 +655,7 @@ $('varGrid').innerHTML = VARIANTS
 $('c_font').innerHTML = Object.entries(FONTS).map(([k,v])=>`<option value="${k}">${v.n}</option>`).join('');
 $('swAcc').innerHTML = SWATCH_ACC.map(c=>`<i data-t="acc" style="background:${c}" title="${c}"></i>`).join('');
 $('swBg').innerHTML  = SWATCH_BG.map(c=>`<i data-t="bg" style="background:${c}" title="${c}"></i>`).join('');
+$('swBack').innerHTML = [...new Set(SWATCH_BG.concat(SWATCH_ACC))].map(c=>`<i data-t="back" style="background:${c}" title="${c}"></i>`).join('');
 
 function applyStyle(k){
   const st = STYLES[k]; S.style=k;
@@ -632,6 +671,9 @@ function syncControls(){
   $('c_font').value=S.font; $('c_size').value=S.size; $('c_imgsize').value=S.imgsize;
   $('c_qr').value=S.qr; $('c_back').checked=S.back; $('c_backstyle').value=S.backstyle;
   $('c_trim').checked=S.trim;
+  const bb=S.backbg||S.acc; $('c_backbg').value=bb; $('c_backbg_t').textContent=S.backbg?S.backbg:'wie Akzent';
+  $('c_backimg').value=S.backimg; $('c_ctsize').value=S.ctsize; $('c_nowhite').checked=S.nowhite;
+  document.querySelectorAll('.shw').forEach(c=>c.checked=S.show[c.dataset.k]!==false);
 }
 
 $('styleChips').onclick = e => { const t=e.target.closest('.chip'); if(t) applyStyle(t.dataset.s); };
@@ -648,6 +690,34 @@ $('c_qr').onchange    = e=>{ S.qr=e.target.value; render(); };
 $('c_back').onchange  = e=>{ S.back=e.target.checked; render(); };
 $('c_backstyle').onchange = e=>{ S.backstyle=e.target.value; render(); };
 $('c_trim').onchange  = e=>{ S.trim=e.target.checked; render(); };
+$('c_ctsize').oninput = e=>{ S.ctsize=+e.target.value; render(); };
+$('c_backimg').oninput= e=>{ S.backimg=+e.target.value; render(); };
+$('c_backbg').oninput = e=>{ S.backbg=e.target.value; syncControls(); render(); };
+$('swBack').onclick   = e=>{ if(e.target.dataset.t){ S.backbg=e.target.title; syncControls(); render(); } };
+$('backAcc').onclick  = ()=>{ S.backbg=null; syncControls(); render(); };
+document.querySelectorAll('.shw').forEach(c=>c.onchange=()=>{ S.show[c.dataset.k]=c.checked; render(); });
+$('c_nowhite').onchange = async e=>{ S.nowhite=e.target.checked; await prepImg(); render(); };
+
+/* Weißen Hintergrund aus dem Logo entfernen */
+function prepImg(){
+  return new Promise(res=>{
+    if(!S.imgRaw){ S.img=null; return res(); }
+    if(!S.nowhite){ S.img=S.imgRaw; return res(); }
+    const im=new Image();
+    im.onload=()=>{
+      const c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight;
+      const x=c.getContext('2d'); x.drawImage(im,0,0);
+      const px=x.getImageData(0,0,c.width,c.height), a=px.data;
+      for(let i=0;i<a.length;i+=4){
+        const m=Math.min(a[i],a[i+1],a[i+2]);
+        if(m>=240) a[i+3]=0; else if(m>=215) a[i+3]=Math.round(a[i+3]*(240-m)/25);
+      }
+      x.putImageData(px,0,0); S.img=c.toDataURL('image/png'); res();
+    };
+    im.onerror=()=>{ S.img=S.imgRaw; res(); };
+    im.src=S.imgRaw;
+  });
+}
 
 document.querySelectorAll('.side input[type=text],.side input[type=email],.side input[type=tel]')
   .forEach(i=>i.oninput = render);
@@ -655,10 +725,10 @@ document.querySelectorAll('.side input[type=text],.side input[type=email],.side 
 $('up').onchange = e=>{
   const file = e.target.files[0]; if(!file) return;
   const r = new FileReader();
-  r.onload = ev => { S.img = ev.target.result; $('fileName').textContent = file.name; render(); };
+  r.onload = async ev => { S.imgRaw = ev.target.result; $('fileName').textContent = file.name; await prepImg(); render(); };
   r.readAsDataURL(file);
 };
-$('clearImg').onclick = ()=>{ S.img=null; $('up').value=''; $('fileName').textContent='Kein Bild geladen'; render(); };
+$('clearImg').onclick = ()=>{ S.img=null; S.imgRaw=null; $('up').value=''; $('fileName').textContent='Kein Bild geladen'; render(); };
 
 $('randomize').onclick = ()=>{
   const sk = Object.keys(STYLES), vk = VARIANTS.map(v=>v.id);
@@ -667,21 +737,38 @@ $('randomize').onclick = ()=>{
 };
 
 /* Speichern / Laden */
-$('saveTpl').onclick = ()=>{
-  try{ localStorage.setItem('vk_data', JSON.stringify({d:data(),s:S}));
-       toast('Gespeichert'); }catch(e){ toast('Speichern nicht möglich'); }
+const FIELDMAP={vorname:'f_vorname',nachname:'f_nachname',titel:'f_titel',firma:'f_firma',
+  strasse:'f_strasse',plz:'f_plz',ort:'f_ort',tel:'f_tel',mobil:'f_mobil',
+  mail:'f_mail',web:'f_web',slogan:'f_slogan'};
+function store(key){
+  try{ localStorage.setItem(key, JSON.stringify({d:data(),s:S})); return true; }
+  catch(e){ // Bild zu groß für den Speicher -> ohne Bild sichern
+    try{ const s2=Object.assign({},S,{img:null,imgRaw:null});
+      localStorage.setItem(key, JSON.stringify({d:data(),s:s2})); }catch(e2){}
+    return false; }
+}
+let ast; function autosave(){ clearTimeout(ast); ast=setTimeout(()=>store('vk_auto'),400); }
+$('saveTpl').onclick = ()=>{ toast(store('vk_data')?'Gespeichert':'Gespeichert (ohne Bild – zu groß)'); };
+function restore(key){
+  const raw = localStorage.getItem(key); if(!raw) return false;
+  const o = JSON.parse(raw);
+  Object.entries(FIELDMAP).forEach(([k,id])=>{ if(o.d && o.d[k]!==undefined) $(id).value=o.d[k]; });
+  Object.assign(S,o.s); S.show=Object.assign({},DEFAULT_S.show,o.s.show||{});
+  $('styleHint').textContent=STYLES[S.style]?.h||'';
+  $('fileName').textContent = S.img?'Bild geladen':'Kein Bild geladen';
+  syncControls(); render(); return true;
+}
+$('resetAll').onclick = ()=>{
+  if(!confirm('Alle Eingaben und Einstellungen löschen?')) return;
+  Object.values(FIELDMAP).forEach(id=>$(id).value='');
+  Object.assign(S, JSON.parse(JSON.stringify(DEFAULT_S)));
+  $('up').value=''; $('fileName').textContent='Kein Bild geladen'; $('styleHint').textContent='';
+  try{ localStorage.removeItem('vk_auto'); }catch(e){}
+  syncControls(); render(); toast('Alles geleert');
 };
 $('loadTpl').onclick = ()=>{
-  try{
-    const raw = localStorage.getItem('vk_data'); if(!raw) return toast('Nichts gespeichert');
-    const o = JSON.parse(raw);
-    const map={vorname:'f_vorname',nachname:'f_nachname',titel:'f_titel',firma:'f_firma',
-      strasse:'f_strasse',plz:'f_plz',ort:'f_ort',tel:'f_tel',mobil:'f_mobil',
-      mail:'f_mail',web:'f_web',slogan:'f_slogan'};
-    Object.entries(map).forEach(([k,id])=>{ if(o.d[k]!==undefined) $(id).value=o.d[k]; });
-    Object.assign(S,o.s); $('styleHint').textContent=STYLES[S.style]?.h||'';
-    syncControls(); render(); toast('Geladen');
-  }catch(e){ toast('Laden fehlgeschlagen'); }
+  try{ toast(restore('vk_data')?'Geladen':'Nichts gespeichert'); }
+  catch(e){ toast('Laden fehlgeschlagen'); }
 };
 
 let tt;
@@ -762,8 +849,9 @@ $('pdf10').onclick = async ()=>{
 /* ============================================================
    START
    ============================================================ */
-applyStyle('professionell');
-S.variant='sidebar'; syncControls(); render();
+let restored=false;
+try{ restored = restore('vk_auto'); }catch(e){}
+if(!restored){ syncControls(); render(); }
 </script>
 </body>
 </html>
