@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Visitenkarten-Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --ui-bg:#0f1115; --ui-panel:#171a21; --ui-panel2:#1e222b; --ui-line:#2b303c;
@@ -66,6 +69,13 @@
     border:1px solid var(--ui-line);padding:10px 18px;border-radius:9px;font-size:13px;
     opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
   #toast.on{opacity:1}
+  .help{font-size:12px;line-height:1.55;color:var(--ui-text)}
+  .help b{display:block;margin:8px 0 2px;color:var(--ui-text)}
+  .help ol,.help ul{margin:0 0 4px;padding-left:18px;color:var(--ui-dim)}
+  .help li{margin:2px 0}
+  .help li b{display:inline;margin:0;color:var(--ui-text)}
+  .foot{font-size:11px;color:var(--ui-dim);text-align:center;line-height:1.6;padding:6px 4px 0}
+  .foot b{color:var(--ui-text)}
 
   /* ============ KARTE ============ */
   /* 91 x 61 mm inkl. 3mm Beschnitt @ 5px/mm  =>  455 x 305 px */
@@ -168,7 +178,7 @@
     <legend>4 &middot; Logo / Foto</legend>
     <input type="file" id="up" accept="image/*">
     <div id="fileName">Kein Bild geladen</div>
-    <label class="chk"><input type="checkbox" id="c_nowhite"> Weißen Hintergrund vom Logo entfernen</label>
+    <label class="chk"><input type="checkbox" id="c_nowhite"> Weißen Rand ums Logo entfernen</label>
     <label>Bildgröße Vorderseite</label>
     <input type="range" id="c_imgsize" min="30" max="150" value="80" style="width:100%">
     <button class="act sec" id="clearImg" style="margin-top:8px">Bild entfernen</button>
@@ -223,6 +233,35 @@
     <div class="hint">Deine Eingaben werden automatisch im Browser gemerkt.</div>
   </fieldset>
 
+  <fieldset>
+    <legend>Hilfe &middot; So druckst du richtig</legend>
+    <div class="help">
+      <b>Zuhause drucken (A4-Bogen)</b>
+      <ol>
+        <li>„PDF – A4-Druckbogen" speichern und öffnen.</li>
+        <li>Im Druckfenster <b>„Tatsächliche Größe" / 100&nbsp;%</b> wählen – nicht „An Seite anpassen".</li>
+        <li>Erst auf normalem Papier testen.</li>
+        <li>Nur Seite 1 drucken, Karton dafür ins hintere Fach (für dickes Papier).</li>
+        <li>Blatt wie eine Buchseite umdrehen, dieselbe Kante wieder zuerst einlegen.</li>
+        <li>Nur Seite 2 drucken. Gegen das Licht halten: Passen Vorder- und Rückseite?</li>
+        <li>Entlang der grauen Linien schneiden, ganz knapp innen.</li>
+      </ol>
+      <b>In der Druckerei</b>
+      <ol>
+        <li>„PDF – Einzelkarte" nutzen: Die hat schon 3&nbsp;mm Beschnitt rundum.</li>
+        <li>Als Format 85&times;55&nbsp;mm angeben.</li>
+      </ol>
+      <b>Gut zu wissen</b>
+      <ul>
+        <li>Papier: 250–350&nbsp;g/m², matt</li>
+        <li>QR-Code vor dem Druck mit dem Handy testen</li>
+        <li>Für den Export einmal mit Internet öffnen</li>
+      </ul>
+    </div>
+  </fieldset>
+
+  <div class="foot">Visitenkarten-Generator &middot; ein Tool von <b>TestNavigator</b><br>&copy; 2026 sachsenstyle &middot; Nur zur eigenen Nutzung, Weitergabe nicht gestattet.</div>
+
 </div>
 
 <div class="main">
@@ -248,12 +287,12 @@
    KONFIGURATION
    ============================================================ */
 const FONTS = {
-  sans:    {n:'Modern Sans',    v:'"Helvetica Neue",Helvetica,Arial,sans-serif'},
-  geo:     {n:'Geometrisch',    v:'"Avenir Next","Century Gothic","Futura","Trebuchet MS",sans-serif'},
-  serif:   {n:'Klassisch Serif',v:'Georgia,"Times New Roman",serif'},
-  eleg:    {n:'Elegant Serif',  v:'"Didot","Bodoni MT","Palatino Linotype",Palatino,Garamond,serif'},
-  mono:    {n:'Technisch Mono', v:'"SF Mono",Menlo,Consolas,"Courier New",monospace'},
-  cond:    {n:'Kondensiert',    v:'"Arial Narrow","Helvetica Neue Condensed",Impact,sans-serif'}
+  sans:    {n:'Modern Sans',    v:'"Inter","Helvetica Neue",Arial,sans-serif'},
+  geo:     {n:'Geometrisch',    v:'"Montserrat","Century Gothic","Trebuchet MS",sans-serif'},
+  serif:   {n:'Klassisch Serif',v:'"Lora",Georgia,"Times New Roman",serif'},
+  eleg:    {n:'Elegant Serif',  v:'"Playfair Display","Didot",Garamond,serif'},
+  mono:    {n:'Technisch Mono', v:'"JetBrains Mono",Consolas,"Courier New",monospace'},
+  cond:    {n:'Kondensiert',    v:'"Oswald","Arial Narrow",Impact,sans-serif'}
 };
 
 const STYLES = {
@@ -710,10 +749,25 @@ function prepImg(){
     im.onload=()=>{
       const c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight;
       const x=c.getContext('2d'); x.drawImage(im,0,0);
-      const px=x.getImageData(0,0,c.width,c.height), a=px.data;
-      for(let i=0;i<a.length;i+=4){
-        const m=Math.min(a[i],a[i+1],a[i+2]);
-        if(m>=240) a[i+3]=0; else if(m>=215) a[i+3]=Math.round(a[i+3]*(240-m)/25);
+      const W=c.width, H=c.height;
+      const px=x.getImageData(0,0,W,H), a=px.data;
+      const light = i => Math.min(a[i*4],a[i*4+1],a[i*4+2]);
+      const bg = new Uint8Array(W*H);            // 1 = gehört zum äußeren Hintergrund
+      const stack = [];
+      const push = (p)=>{ if(!bg[p] && light(p)>=228){ bg[p]=1; stack.push(p); } };
+      for(let i=0;i<W;i++){ push(i); push((H-1)*W+i); }
+      for(let j=0;j<H;j++){ push(j*W); push(j*W+W-1); }
+      while(stack.length){
+        const p=stack.pop(), px_=p%W, py=(p-px_)/W;
+        if(px_>0) push(p-1); if(px_<W-1) push(p+1);
+        if(py>0) push(p-W);  if(py<H-1) push(p+W);
+      }
+      for(let p=0;p<W*H;p++){
+        if(bg[p]){ a[p*4+3]=0; continue; }
+        // weiche Kante: helle Pixel direkt neben dem Hintergrund
+        const px_=p%W;
+        const nb=(px_>0&&bg[p-1])||(px_<W-1&&bg[p+1])||(p>=W&&bg[p-W])||(p<W*(H-1)&&bg[p+W]);
+        if(nb){ const m=light(p); if(m>=200) a[p*4+3]=Math.round(a[p*4+3]*(255-m)/55); }
       }
       x.putImageData(px,0,0); S.img=c.toDataURL('image/png'); res();
     };
@@ -790,6 +844,7 @@ function ready(needPdf){
   return true;
 }
 async function shoot(el){
+  try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
   el.classList.add('exporting');
   const cv = await html2canvas(el,{scale:SCALE,backgroundColor:null,logging:false,useCORS:true});
   el.classList.remove('exporting');
@@ -852,6 +907,7 @@ $('pdf10').onclick = async ()=>{
 /* ============================================================
    START
    ============================================================ */
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>render());
 let restored=false;
 try{ restored = restore('vk_auto'); }catch(e){}
 if(!restored){ syncControls(); render(); }
