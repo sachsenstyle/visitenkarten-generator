@@ -80,7 +80,7 @@
   /* ============ KARTE ============ */
   /* 91 x 61 mm inkl. 3mm Beschnitt @ 5px/mm  =>  455 x 305 px */
   .card{position:relative;width:455px;height:305px;overflow:hidden;background:#fff;
-    --bleed:15px;--pad:15px;--acc:#0f4c81;--bg:#ffffff;--ink:#141821;--soft:#5d6674;
+    --bleed:15px;--pad:15px;--acc:#0f4c81;--accs:#0f4c81;--bg:#ffffff;--ink:#141821;--soft:#5d6674;
     font-family:var(--ff);color:var(--ink);background:var(--bg)}
   .card *{box-sizing:border-box}
   .safe{position:absolute;inset:calc(var(--bleed) + var(--pad));display:flex}
@@ -89,12 +89,12 @@
   .card.exporting .trim{display:none}
   .nm{font-size:22px;font-weight:700;line-height:1.12;letter-spacing:-.01em;margin:0}
   .nm small{display:block;font-size:11.5px;font-weight:700;letter-spacing:.16em;
-    text-transform:uppercase;color:var(--acc);margin-top:6px}
+    text-transform:uppercase;color:var(--accs);margin-top:6px}
   .fm{font-size:12.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
   .ct{font-size:12px;line-height:1.6;color:var(--soft);font-weight:500}
   .ct div{overflow-wrap:anywhere}
-  .ct b{font-weight:700;color:var(--acc);display:inline-block;min-width:26px}
-  .rule{height:2px;background:var(--acc);border-radius:2px}
+  .ct b{font-weight:700;color:var(--accs);display:inline-block;min-width:26px}
+  .rule{height:2px;background:var(--accs);border-radius:2px}
   .qrbox{background:#fff;padding:5px;border-radius:4px;display:inline-block;line-height:0}
   .qrbox img{display:block}
   .logo{object-fit:contain}
@@ -161,6 +161,13 @@
     <label>Akzentfarbe</label>
     <div class="cc"><input type="color" id="c_acc"><small id="c_acc_t"></small></div>
     <div class="sw" id="swAcc"></div>
+    <label>Farbe der Schrift</label>
+    <select id="c_txtmode">
+      <option value="text">Alles in Textfarbe – Farbe nur für Flächen</option>
+      <option value="sharp">Akzentfarbe, druckscharf (etwas dunkler)</option>
+      <option value="acc">Akzentfarbe wie gewählt</option>
+    </select>
+    <div class="hint">Für den Drucker zuhause am schärfsten: „Alles in Textfarbe". Farbige kleine Schrift franst beim Tintendrucker leicht aus.</div>
     <label>Hintergrund</label>
     <div class="cc"><input type="color" id="c_bg"><small id="c_bg_t"></small></div>
     <div class="sw" id="swBg"></div>
@@ -322,7 +329,7 @@ const VARIANTS = [
   {id:'frame',    n:'10 Rahmen',       d:'Feine Outline, Monogramm'}
 ];
 
-const SWATCH_ACC = ['#0f4c81','#1c2b45','#e63946','#c2a15c','#2a9d8f','#7b2cbf','#ff7b00','#111111','#0a8754','#d90429'];
+const SWATCH_ACC = ['#0f4c81','#1c2b45','#e63946','#c2a15c','#2a9d8f','#7b2cbf','#ff7b00','#111111','#1f5e3b','#d90429'];
 const SWATCH_BG  = ['#ffffff','#fbfaf7','#f2f0eb','#eef2f6','#101317','#14100e','#1b2430','#2b2118','#0d1f1c','#f7e9dd'];
 
 /* ============================================================
@@ -330,9 +337,9 @@ const SWATCH_BG  = ['#ffffff','#fbfaf7','#f2f0eb','#eef2f6','#101317','#14100e',
    ============================================================ */
 const S = {
   style:null, variant:'minimal',
-  acc:'#1c2b45', bg:'#ffffff', ink:'#171c26', font:'sans',
+  acc:'#1c2b45', bg:'#ffffff', ink:'#000000', font:'sans',
   size:22, ctsize:12, img:null, imgRaw:null, nowhite:false, imgsize:80, qr:'web',
-  back:true, backstyle:'logo', backbg:null, backimg:110, trim:true,
+  back:true, txtmode:'text', backstyle:'logo', backbg:null, backimg:110, trim:true,
   show:{titel:true,firma:true,adresse:true,tel:true,mail:true,web:true,slogan:true}
 };
 const DEFAULT_S = JSON.parse(JSON.stringify(S));
@@ -410,7 +417,7 @@ function bName(d,al='left'){
   return `<div class="nm" style="text-align:${al}">${esc(d.vorname)}${d.vorname&&d.nachname?' ':''}${esc(d.nachname)}
     ${d.titel?`<small>${esc(d.titel)}</small>`:''}</div>`;
 }
-function bFirma(d,al='left'){ return d.firma?`<div class="fm" style="text-align:${al};color:var(--acc)">${esc(d.firma)}</div>`:''; }
+function bFirma(d,al='left'){ return d.firma?`<div class="fm" style="text-align:${al};color:var(--accs)">${esc(d.firma)}</div>`:''; }
 function bContact(d,al='left',showAll=true){
   const L=[];
   if(d.strasse) L.push(`<div>${esc(d.strasse)}</div>`);
@@ -665,8 +672,9 @@ function applyVars(el){
   el.style.setProperty('--acc',S.acc);
   el.style.setProperty('--bg',S.bg);
   el.style.setProperty('--ink',S.ink);
-  el.style.setProperty('--soft',isDark(S.bg)?mix(S.ink,-8):mix(S.ink,12));
+  el.style.setProperty('--soft', S.txtmode==='text' ? S.ink : (isDark(S.bg)?mix(S.ink,-8):mix(S.ink,12)));
   el.style.setProperty('--ff',FONTS[S.font].v);
+  el.style.setProperty('--accs', S.txtmode==='text' ? S.ink : (S.txtmode==='sharp' && !isDark(S.bg)) ? mix(S.acc,-38) : S.acc);
   el.style.background = S.bg; el.style.color = S.ink;
 }
 function render(){
@@ -713,7 +721,7 @@ function syncControls(){
   $('c_acc_t').textContent=S.acc; $('c_bg_t').textContent=S.bg; $('c_ink_t').textContent=S.ink;
   $('c_font').value=S.font; $('c_size').value=S.size; $('c_imgsize').value=S.imgsize;
   $('c_qr').value=S.qr; $('c_back').checked=S.back; $('c_backstyle').value=S.backstyle;
-  $('c_trim').checked=S.trim;
+  $('c_trim').checked=S.trim; $('c_txtmode').value=S.txtmode||'text';
   const bb=S.backbg||S.acc; $('c_backbg').value=bb; $('c_backbg_t').textContent=S.backbg?S.backbg:'wie Akzent';
   $('c_backimg').value=S.backimg; $('c_ctsize').value=S.ctsize; $('c_nowhite').checked=S.nowhite;
   document.querySelectorAll('.shw').forEach(c=>c.checked=S.show[c.dataset.k]!==false);
@@ -722,7 +730,7 @@ function syncControls(){
 $('styleChips').onclick = e => { const t=e.target.closest('.chip'); if(t) applyStyle(t.dataset.s); };
 $('varGrid').onclick    = e => { const t=e.target.closest('.vbtn'); if(t){ S.variant=t.dataset.v; syncControls(); render(); } };
 $('swAcc').onclick = e => { if(e.target.dataset.t){ S.acc=e.target.title; syncControls(); render(); } };
-$('swBg').onclick  = e => { if(e.target.dataset.t){ S.bg=e.target.title; S.ink=isDark(S.bg)?'#f4f6fa':'#171c26'; syncControls(); render(); } };
+$('swBg').onclick  = e => { if(e.target.dataset.t){ S.bg=e.target.title; S.ink=isDark(S.bg)?'#f4f6fa':'#000000'; syncControls(); render(); } };
 
 ['c_acc','c_bg','c_ink'].forEach(id=>$(id).oninput = e=>{
   S[id.slice(2)] = e.target.value; syncControls(); render(); });
@@ -733,6 +741,7 @@ $('c_qr').onchange    = e=>{ S.qr=e.target.value; render(); };
 $('c_back').onchange  = e=>{ S.back=e.target.checked; render(); };
 $('c_backstyle').onchange = e=>{ S.backstyle=e.target.value; render(); };
 $('c_trim').onchange  = e=>{ S.trim=e.target.checked; render(); };
+$('c_txtmode').onchange = e=>{ S.txtmode=e.target.value; render(); };
 $('c_ctsize').oninput = e=>{ S.ctsize=+e.target.value; render(); };
 $('c_backimg').oninput= e=>{ S.backimg=+e.target.value; render(); };
 $('c_backbg').oninput = e=>{ S.backbg=e.target.value; syncControls(); render(); };
@@ -811,7 +820,7 @@ function restore(key){
   const raw = localStorage.getItem(key); if(!raw) return false;
   const o = JSON.parse(raw);
   Object.entries(FIELDMAP).forEach(([k,id])=>{ if(o.d && o.d[k]!==undefined) $(id).value=o.d[k]; });
-  Object.assign(S,o.s); if(!(S.ctsize>=10)) S.ctsize=12; S.show=Object.assign({},DEFAULT_S.show,o.s.show||{});
+  Object.assign(S,o.s); if(!(S.ctsize>=10)) S.ctsize=12; if(!S.txtmode) S.txtmode='text'; delete S.sharp; S.show=Object.assign({},DEFAULT_S.show,o.s.show||{});
   $('styleHint').textContent=STYLES[S.style]?.h||'';
   $('fileName').textContent = S.img?'Bild geladen':'Kein Bild geladen';
   syncControls(); render(); return true;
