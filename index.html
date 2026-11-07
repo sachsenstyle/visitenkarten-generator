@@ -4,18 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Visitenkarten-Generator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --ui-bg:#0f1115; --ui-panel:#171a21; --ui-panel2:#1e222b; --ui-line:#2b303c;
     --ui-text:#e7e9ee; --ui-dim:#9aa2b1; --ui-acc:#4f8cff;
   }
   *{box-sizing:border-box}
-  html,body{overflow-x:hidden;max-width:100%}
-  fieldset{min-width:0}
-  input[type=range]{display:block;max-width:100%}
   body{margin:0;background:var(--ui-bg);color:var(--ui-text);
     font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
   header{padding:16px 22px;border-bottom:1px solid var(--ui-line);display:flex;
@@ -23,9 +17,9 @@
   header h1{font-size:17px;margin:0;letter-spacing:.2px}
   header span{color:var(--ui-dim);font-size:12px}
   .wrap{display:flex;align-items:flex-start;gap:0;min-height:calc(100vh - 55px)}
-  .side{width:370px;flex:0 0 370px;overflow-x:hidden;border-right:1px solid var(--ui-line);
+  .side{width:370px;flex:0 0 370px;border-right:1px solid var(--ui-line);
     padding:16px 18px 60px;height:calc(100vh - 55px);overflow-y:auto}
-  .main{flex:1;min-width:0;padding:26px;display:flex;flex-direction:column;align-items:center;gap:22px;
+  .main{flex:1;padding:26px;display:flex;flex-direction:column;align-items:center;gap:22px;
     height:calc(100vh - 55px);overflow-y:auto}
   fieldset{border:1px solid var(--ui-line);border-radius:10px;margin:0 0 14px;padding:12px 12px 14px;
     background:var(--ui-panel)}
@@ -69,44 +63,37 @@
     border:1px solid var(--ui-line);padding:10px 18px;border-radius:9px;font-size:13px;
     opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
   #toast.on{opacity:1}
-  .help{font-size:12px;line-height:1.55;color:var(--ui-text)}
-  .help b{display:block;margin:8px 0 2px;color:var(--ui-text)}
-  .help ol,.help ul{margin:0 0 4px;padding-left:18px;color:var(--ui-dim)}
-  .help li{margin:2px 0}
-  .help li b{display:inline;margin:0;color:var(--ui-text)}
-  .foot{font-size:11px;color:var(--ui-dim);text-align:center;line-height:1.6;padding:6px 4px 0}
-  .foot b{color:var(--ui-text)}
 
   /* ============ KARTE ============ */
   /* 91 x 61 mm inkl. 3mm Beschnitt @ 5px/mm  =>  455 x 305 px */
   .card{position:relative;width:455px;height:305px;overflow:hidden;background:#fff;
-    --bleed:15px;--pad:15px;--acc:#0f4c81;--accs:#0f4c81;--bg:#ffffff;--ink:#141821;--soft:#5d6674;
+    --bleed:15px;--acc:#0f4c81;--bg:#ffffff;--ink:#141821;--soft:#5d6674;
     font-family:var(--ff);color:var(--ink);background:var(--bg)}
   .card *{box-sizing:border-box}
-  .safe{position:absolute;inset:calc(var(--bleed) + var(--pad));display:flex}
+  .safe{position:absolute;inset:var(--bleed);display:flex}
   .trim{position:absolute;inset:var(--bleed);border:1px dashed rgba(255,0,90,.5);
     pointer-events:none;z-index:50}
   .card.exporting .trim{display:none}
   .nm{font-size:22px;font-weight:700;line-height:1.12;letter-spacing:-.01em;margin:0}
-  .nm small{display:block;font-size:11.5px;font-weight:700;letter-spacing:.16em;
-    text-transform:uppercase;color:var(--accs);margin-top:6px}
-  .fm{font-size:12.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
-  .ct{font-size:12px;line-height:1.6;color:var(--soft);font-weight:500}
-  .ct div{overflow-wrap:anywhere}
-  .ct b{font-weight:700;color:var(--accs);display:inline-block;min-width:26px}
-  .rule{height:2px;background:var(--accs);border-radius:2px}
+  .nm small{display:block;font-size:10px;font-weight:600;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--acc);margin-top:6px}
+  .fm{font-size:11.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+  .ct{font-size:9.6px;line-height:1.65;color:var(--soft)}
+  .ct div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ct b{font-weight:600;color:var(--acc);display:inline-block;min-width:26px}
+  .rule{height:2px;background:var(--acc);border-radius:2px}
   .qrbox{background:#fff;padding:5px;border-radius:4px;display:inline-block;line-height:0}
   .qrbox img{display:block}
   .logo{object-fit:contain}
   .avatar{object-fit:cover;border-radius:50%}
-  .slog{font-size:11.5px;font-style:italic;color:var(--soft)}
+  .slog{font-size:10px;font-style:italic;color:var(--soft)}
 </style>
 </head>
 <body>
 
 <header>
   <h1>Visitenkarten-Generator</h1>
-  <span>5 Stile &middot; 10 Varianten &middot; frei anpassbar &middot; Vorder- &amp; Rückseite &middot; Druck-PDF 85&times;55&nbsp;mm</span>
+  <span>5 Stile &middot; 10 Varianten &middot; Vorder- &amp; Rückseite &middot; Druck-PDF 85&times;55&nbsp;mm</span>
 </header>
 
 <div class="wrap">
@@ -115,38 +102,27 @@
   <fieldset>
     <legend>Kontaktdaten</legend>
     <div class="row">
-      <div><label>Vorname</label><input type="text" id="f_vorname" placeholder="z. B. Anna"></div>
-      <div><label>Nachname</label><input type="text" id="f_nachname" placeholder="z. B. Muster"></div>
+      <div><label>Vorname</label><input type="text" id="f_vorname" value="Ramona"></div>
+      <div><label>Nachname</label><input type="text" id="f_nachname" value="Bergmann"></div>
     </div>
-    <label>Position / Titel</label><input type="text" id="f_titel" placeholder="z. B. Autorin">
-    <label>Firma</label><input type="text" id="f_firma" placeholder="Firmen- oder Markenname">
-    <label>Straße &amp; Hausnummer</label><input type="text" id="f_strasse" placeholder="Straße Nr.">
+    <label>Position / Titel</label><input type="text" id="f_titel" value="Autorin &amp; Investorin">
+    <label>Firma</label><input type="text" id="f_firma" value="Bergmann Media">
+    <label>Straße &amp; Hausnummer</label><input type="text" id="f_strasse" value="Lindenallee 24">
     <div class="row">
-      <div style="flex:0 0 90px"><label>PLZ</label><input type="text" id="f_plz" placeholder="PLZ"></div>
-      <div><label>Ort</label><input type="text" id="f_ort" placeholder="Ort"></div>
+      <div style="flex:0 0 90px"><label>PLZ</label><input type="text" id="f_plz" value="10115"></div>
+      <div><label>Ort</label><input type="text" id="f_ort" value="Berlin"></div>
     </div>
     <div class="row">
-      <div><label>Telefon</label><input type="tel" id="f_tel" placeholder="optional"></div>
-      <div><label>Mobil</label><input type="tel" id="f_mobil" placeholder="optional"></div>
+      <div><label>Telefon</label><input type="tel" id="f_tel" value="+49 30 1234567"></div>
+      <div><label>Mobil</label><input type="tel" id="f_mobil" value="+49 170 9876543"></div>
     </div>
-    <label>E-Mail</label><input type="email" id="f_mail" placeholder="name@beispiel.de">
-    <label>Webseite</label><input type="text" id="f_web" placeholder="www.beispiel.de">
-    <label>Slogan / Claim (optional)</label><input type="text" id="f_slogan" placeholder="optional">
+    <label>E-Mail</label><input type="email" id="f_mail" value="kontakt@bergmann-media.de">
+    <label>Webseite</label><input type="text" id="f_web" value="www.bergmann-media.de">
+    <label>Slogan / Claim (optional)</label><input type="text" id="f_slogan" value="Bücher. Ideen. Wachstum.">
   </fieldset>
 
   <fieldset>
-    <legend>Was soll auf die Karte?</legend>
-    <label class="chk"><input type="checkbox" class="shw" data-k="titel" checked> Position / Titel</label>
-    <label class="chk"><input type="checkbox" class="shw" data-k="firma" checked> Firma</label>
-    <label class="chk"><input type="checkbox" class="shw" data-k="adresse" checked> Adresse</label>
-    <label class="chk"><input type="checkbox" class="shw" data-k="tel" checked> Telefon &amp; Mobil</label>
-    <label class="chk"><input type="checkbox" class="shw" data-k="mail" checked> E-Mail</label>
-    <label class="chk"><input type="checkbox" class="shw" data-k="web" checked> Webseite</label>
-    <label class="chk"><input type="checkbox" class="shw" data-k="slogan" checked> Slogan</label>
-  </fieldset>
-
-  <fieldset>
-    <legend>1 &middot; Stil / Anlass (nur als Startpunkt)</legend>
+    <legend>1 &middot; Stil / Anlass</legend>
     <div class="chips" id="styleChips"></div>
     <div class="hint" id="styleHint"></div>
   </fieldset>
@@ -161,34 +137,24 @@
     <label>Akzentfarbe</label>
     <div class="cc"><input type="color" id="c_acc"><small id="c_acc_t"></small></div>
     <div class="sw" id="swAcc"></div>
-    <label>Farbe der Schrift</label>
-    <select id="c_txtmode">
-      <option value="text">Alles in Textfarbe – Farbe nur für Flächen</option>
-      <option value="sharp">Akzentfarbe, druckscharf (etwas dunkler)</option>
-      <option value="acc">Akzentfarbe wie gewählt</option>
-    </select>
-    <div class="hint">Für den Drucker zuhause am schärfsten: „Alles in Textfarbe". Farbige kleine Schrift franst beim Tintendrucker leicht aus.</div>
     <label>Hintergrund</label>
     <div class="cc"><input type="color" id="c_bg"><small id="c_bg_t"></small></div>
     <div class="sw" id="swBg"></div>
     <label>Textfarbe</label>
     <div class="cc"><input type="color" id="c_ink"><small id="c_ink_t"></small></div>
+    <div id="ctWarn"></div>
     <label>Schriftart</label>
     <select id="c_font"></select>
     <label>Schriftgröße Name</label>
-    <input type="range" id="c_size" min="14" max="32" value="22" style="width:100%">
-    <label>Schriftgröße Kontaktdaten</label>
-    <input type="range" id="c_ctsize" min="10" max="15" step="0.2" value="12" style="width:100%">
-    <div class="hint">Unter der Mitte wird die Schrift gedruckt schnell zu klein zum Lesen.</div>
+    <input type="range" id="c_size" min="16" max="30" value="22" style="width:100%">
   </fieldset>
 
   <fieldset>
     <legend>4 &middot; Logo / Foto</legend>
     <input type="file" id="up" accept="image/*">
     <div id="fileName">Kein Bild geladen</div>
-    <label class="chk"><input type="checkbox" id="c_nowhite"> Weißen Rand ums Logo entfernen</label>
-    <label>Bildgröße Vorderseite</label>
-    <input type="range" id="c_imgsize" min="30" max="150" value="80" style="width:100%">
+    <label>Bildgröße</label>
+    <input type="range" id="c_imgsize" min="40" max="150" value="80" style="width:100%">
     <button class="act sec" id="clearImg" style="margin-top:8px">Bild entfernen</button>
   </fieldset>
 
@@ -202,6 +168,11 @@
       <option value="tel">Telefon</option>
     </select>
     <div class="hint">Die vCard speichert Name, Firma, Adresse, Telefon, Mobil, E-Mail und Web beim Scannen direkt ins Adressbuch.</div>
+    <label class="chk"><input type="checkbox" id="c_qrlab"> Text unter dem QR-Code anzeigen</label>
+    <input type="text" id="c_qrtext" value="Scannen &amp; speichern" style="margin-top:6px">
+    <label>Weißer Rand um den QR-Code</label>
+    <div class="sl"><input type="range" id="c_qrpad" min="3" max="14" value="5"><b id="c_qrpadV">5</b></div>
+    <div class="hint">Scanner brauchen rundum freie Fläche. Zu wenig Rand ist der häufigste Grund, warum ein gedruckter QR-Code nicht erkannt wird.</div>
   </fieldset>
 
   <fieldset>
@@ -215,18 +186,21 @@
       <option value="contact">Kontaktdaten komplett</option>
       <option value="plain">Nur Farbfläche</option>
     </select>
-    <label>Hintergrund Rückseite</label>
-    <div class="cc"><input type="color" id="c_backbg"><small id="c_backbg_t"></small></div>
-    <div class="sw" id="swBack"></div>
-    <button class="act sec" id="backAcc" style="margin-top:6px">Wie Akzentfarbe</button>
-    <label>Bildgröße Rückseite</label>
-    <input type="range" id="c_backimg" min="50" max="230" value="110" style="width:100%">
   </fieldset>
 
   <fieldset>
     <legend>7 &middot; Export</legend>
+    <label>Abstand zwischen den Karten auf dem A4-Bogen</label>
+    <div class="sl"><input type="range" id="c_gutter" min="0" max="8" value="3"><b id="c_gutterV">3 mm</b></div>
+    <label>Schnitthilfe auf dem Bogen</label>
+    <select id="c_cutmode">
+      <option value="marks" selected>Eckmarken (sauberster Druck)</option>
+      <option value="lines">Durchgehende Linien (gut fürs Lineal)</option>
+      <option value="none">keine</option>
+    </select>
+    <div class="hint" id="sheetInfo"></div>
     <button class="act" id="pdf1">PDF – Einzelkarte (mit Beschnitt)</button>
-    <button class="act sec" id="pdf10">PDF – A4-Druckbogen (10 Karten)</button>
+    <button class="act sec" id="pdf10">PDF – A4-Druckbogen</button>
     <button class="act sec" id="png1">PNG – Vorderseite</button>
     <label class="chk"><input type="checkbox" id="c_trim" checked> Schnittlinie in Vorschau zeigen</label>
     <div class="hint">Einzelkarte: 91&times;61&nbsp;mm Seite = 85&times;55&nbsp;mm Endformat + 3&nbsp;mm Beschnitt rundum, 300&nbsp;dpi. Genau so wollen es Druckereien.</div>
@@ -237,38 +211,7 @@
     <button class="act sec" id="saveTpl">Daten speichern (im Browser)</button>
     <button class="act sec" id="loadTpl">Daten laden</button>
     <button class="act sec" id="randomize">Zufälliges Design</button>
-    <button class="act sec" id="resetAll">Alles leeren &amp; neu anfangen</button>
-    <div class="hint">Deine Eingaben werden automatisch im Browser gemerkt.</div>
   </fieldset>
-
-  <fieldset>
-    <legend>Hilfe &middot; So druckst du richtig</legend>
-    <div class="help">
-      <b>Zuhause drucken (A4-Bogen)</b>
-      <ol>
-        <li>„PDF – A4-Druckbogen" speichern und öffnen.</li>
-        <li>Im Druckfenster <b>„Tatsächliche Größe" / 100&nbsp;%</b> wählen – nicht „An Seite anpassen".</li>
-        <li>Erst auf normalem Papier testen.</li>
-        <li>Nur Seite 1 drucken, Karton dafür ins hintere Fach (für dickes Papier).</li>
-        <li>Blatt wie eine Buchseite umdrehen, dieselbe Kante wieder zuerst einlegen.</li>
-        <li>Nur Seite 2 drucken. Gegen das Licht halten: Passen Vorder- und Rückseite?</li>
-        <li>Entlang der grauen Linien schneiden, ganz knapp innen.</li>
-      </ol>
-      <b>In der Druckerei</b>
-      <ol>
-        <li>„PDF – Einzelkarte" nutzen: Die hat schon 3&nbsp;mm Beschnitt rundum.</li>
-        <li>Als Format 85&times;55&nbsp;mm angeben.</li>
-      </ol>
-      <b>Gut zu wissen</b>
-      <ul>
-        <li>Papier: 250–350&nbsp;g/m², matt</li>
-        <li>QR-Code vor dem Druck mit dem Handy testen</li>
-        <li>Für den Export einmal mit Internet öffnen</li>
-      </ul>
-    </div>
-  </fieldset>
-
-  <div class="foot">Visitenkarten-Generator &middot; ein Tool von <b>TestNavigator</b><br>&copy; 2026 sachsenstyle &middot; Nur zur eigenen Nutzung, Weitergabe nicht gestattet.</div>
 
 </div>
 
@@ -295,12 +238,12 @@
    KONFIGURATION
    ============================================================ */
 const FONTS = {
-  sans:    {n:'Modern Sans',    v:'"Inter","Helvetica Neue",Arial,sans-serif'},
-  geo:     {n:'Geometrisch',    v:'"Montserrat","Century Gothic","Trebuchet MS",sans-serif'},
-  serif:   {n:'Klassisch Serif',v:'"Lora",Georgia,"Times New Roman",serif'},
-  eleg:    {n:'Elegant Serif',  v:'"Playfair Display","Didot",Garamond,serif'},
-  mono:    {n:'Technisch Mono', v:'"JetBrains Mono",Consolas,"Courier New",monospace'},
-  cond:    {n:'Kondensiert',    v:'"Oswald","Arial Narrow",Impact,sans-serif'}
+  sans:    {n:'Modern Sans',    v:'"Helvetica Neue",Helvetica,Arial,sans-serif'},
+  geo:     {n:'Geometrisch',    v:'"Avenir Next","Century Gothic","Futura","Trebuchet MS",sans-serif'},
+  serif:   {n:'Klassisch Serif',v:'Georgia,"Times New Roman",serif'},
+  eleg:    {n:'Elegant Serif',  v:'"Didot","Bodoni MT","Palatino Linotype",Palatino,Garamond,serif'},
+  mono:    {n:'Technisch Mono', v:'"SF Mono",Menlo,Consolas,"Courier New",monospace'},
+  cond:    {n:'Kondensiert',    v:'"Arial Narrow","Helvetica Neue Condensed",Impact,sans-serif'}
 };
 
 const STYLES = {
@@ -329,20 +272,20 @@ const VARIANTS = [
   {id:'frame',    n:'10 Rahmen',       d:'Feine Outline, Monogramm'}
 ];
 
-const SWATCH_ACC = ['#0f4c81','#1c2b45','#e63946','#c2a15c','#2a9d8f','#7b2cbf','#ff7b00','#111111','#1f5e3b','#d90429'];
+const SWATCH_ACC = ['#0f4c81','#1c2b45','#e63946','#c2a15c','#2a9d8f','#7b2cbf','#ff7b00','#111111','#0a8754','#d90429'];
 const SWATCH_BG  = ['#ffffff','#fbfaf7','#f2f0eb','#eef2f6','#101317','#14100e','#1b2430','#2b2118','#0d1f1c','#f7e9dd'];
 
 /* ============================================================
    STATE
    ============================================================ */
 const S = {
-  style:null, variant:'minimal',
-  acc:'#1c2b45', bg:'#ffffff', ink:'#000000', font:'sans',
-  size:22, ctsize:12, img:null, imgRaw:null, nowhite:false, imgsize:80, qr:'web',
-  back:true, txtmode:'text', backstyle:'logo', backbg:null, backimg:110, trim:true,
-  show:{titel:true,firma:true,adresse:true,tel:true,mail:true,web:true,slogan:true}
+  style:'professionell', variant:'sidebar',
+  acc:'#0f4c81', bg:'#ffffff', ink:'#171c26', font:'sans',
+  size:22, img:null, imgsize:80, qr:'web',
+  qrlab:false, qrtext:'Scannen & speichern', qrpad:5,
+  back:true, backstyle:'logo', trim:true,
+  gutter:3, cutmode:'marks'
 };
-const DEFAULT_S = JSON.parse(JSON.stringify(S));
 
 const $ = id => document.getElementById(id);
 const esc = s => (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -357,18 +300,40 @@ function data(){
     web:$('f_web').value.trim(),         slogan:$('f_slogan').value.trim()
   };
 }
-function view(){
-  const d = data(), sh = S.show;
-  if(!sh.titel) d.titel=''; if(!sh.firma) d.firma='';
-  if(!sh.adresse){ d.strasse=''; d.plz=''; d.ort=''; }
-  if(!sh.tel){ d.tel=''; d.mobil=''; }
-  if(!sh.mail) d.mail=''; if(!sh.web) d.web=''; if(!sh.slogan) d.slogan='';
-  return d;
-}
 const initials = d => ((d.vorname[0]||'')+(d.nachname[0]||'')).toUpperCase();
 function isDark(hex){
   const c=hex.replace('#',''); const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);
   return (0.299*r+0.587*g+0.114*b) < 140;
+}
+/* WCAG-Kontrastverhältnis: 1 = unsichtbar, 21 = Schwarz auf Weiß */
+function relLum(hex){
+  const c=hex.replace('#','');
+  const v=[0,2,4].map(i=>{
+    const s=parseInt(c.substr(i,2),16)/255;
+    return s<=0.04045 ? s/12.92 : Math.pow((s+0.055)/1.055,2.4);
+  });
+  return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2];
+}
+function contrast(a,b){
+  const l1=relLum(a),l2=relLum(b);
+  return (Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05);
+}
+/* Nach jeder Farbänderung prüfen – und Unlesbares gar nicht erst entstehen lassen */
+function guardContrast(changed){
+  if(changed==='bg' && contrast(S.ink,S.bg)<3)
+    S.ink = isDark(S.bg) ? '#f4f6fa' : '#171c26';
+  if(changed==='ink' && contrast(S.ink,S.bg)<3 && contrast(S.ink,'#ffffff')>contrast(S.ink,'#111111'))
+    S.bg = '#111318';
+}
+function showContrast(){
+  const w=[], cTx=contrast(S.ink,S.bg), cAc=contrast(S.acc,S.bg);
+  if(cTx<4.5) w.push(`Text und Hintergrund haben zu wenig Kontrast (${cTx.toFixed(1)}:1). Gedruckt wird das schwer lesbar – empfohlen sind mindestens 4,5:1.`);
+  if(cAc<3)   w.push(`Die Akzentfarbe hebt sich kaum vom Hintergrund ab (${cAc.toFixed(1)}:1). Firmenname und Beschriftungen gehen unter.`);
+  const el=$('ctWarn');
+  el.innerHTML = w.length
+    ? w.map(t=>`<div style="background:rgba(255,181,71,.13);border:1px solid rgba(255,181,71,.4);
+        color:#ffd79a;border-radius:7px;padding:8px 10px;font-size:11.5px;line-height:1.5;margin-top:8px">${t}</div>`).join('')
+    : `<div style="font-size:11px;color:#7fd6a8;margin-top:8px">Kontrast in Ordnung (${cTx.toFixed(1)}:1).</div>`;
 }
 function mix(hex,pct){ // pct>0 heller, <0 dunkler
   const c=hex.replace('#',''); let r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);
@@ -417,7 +382,7 @@ function bName(d,al='left'){
   return `<div class="nm" style="text-align:${al}">${esc(d.vorname)}${d.vorname&&d.nachname?' ':''}${esc(d.nachname)}
     ${d.titel?`<small>${esc(d.titel)}</small>`:''}</div>`;
 }
-function bFirma(d,al='left'){ return d.firma?`<div class="fm" style="text-align:${al};color:var(--accs)">${esc(d.firma)}</div>`:''; }
+function bFirma(d,al='left'){ return d.firma?`<div class="fm" style="text-align:${al};color:var(--acc)">${esc(d.firma)}</div>`:''; }
 function bContact(d,al='left',showAll=true){
   const L=[];
   if(d.strasse) L.push(`<div>${esc(d.strasse)}</div>`);
@@ -431,8 +396,14 @@ function bContact(d,al='left',showAll=true){
   return `<div class="ct" style="text-align:${al}">${L.join('')}</div>`;
 }
 function bQR(d,px=58){
-  const u = qrDataURL(data()); if(!u) return '';
-  return `<div class="qrbox"><img src="${u}" style="width:${px}px;height:${px}px"></div>`;
+  const u = qrDataURL(d); if(!u) return '';
+  return `<div class="qrbox" style="padding:${S.qrpad}px"><img src="${u}" style="width:${px}px;height:${px}px"></div>`;
+}
+/* Beschriftung unter dem QR-Code – nur wenn gewünscht */
+function bQRLabel(col){
+  if(!S.qrlab || S.qr==='off' || !S.qrtext.trim()) return '';
+  return `<div style="font-size:8px;letter-spacing:.15em;text-transform:uppercase;
+    text-align:center;color:${col}">${esc(S.qrtext)}</div>`;
 }
 function bImg(d,size,round){
   if(S.img) return `<img src="${S.img}" class="${round?'avatar':'logo'}" style="width:${size}px;height:${size}px">`;
@@ -458,18 +429,18 @@ minimal(d){ return `<div class="safe" style="flex-direction:column;align-items:c
 
 sidebar(d){ return `
   <div style="position:absolute;left:0;top:0;bottom:0;width:calc(var(--bleed) + 108px);background:var(--acc)"></div>
-  <div style="position:absolute;left:var(--bleed);top:calc(var(--bleed) + var(--pad));bottom:calc(var(--bleed) + var(--pad));width:108px;
+  <div style="position:absolute;left:var(--bleed);top:var(--bleed);bottom:var(--bleed);width:108px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#fff">
     ${bImg(d,Math.min(S.imgsize,76),false)}
-    ${d.firma?`<div style="font-size:${Math.max(5.5,Math.min(9.4,92/(Math.max(...d.firma.split(' ').map(w=>w.length))*0.86)))}px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-      text-align:center;color:${isDark(S.acc)?'#ffffff':'#101317'};padding:0 4px;line-height:1.35;overflow-wrap:anywhere;width:100%">${esc(d.firma)}</div>`:''}
+    ${d.firma?`<div style="font-size:9.4px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+      text-align:center;color:${isDark(S.acc)?'#ffffff':'#101317'};padding:0 8px;line-height:1.4">${esc(d.firma)}</div>`:''}
   </div>
   <div class="safe" style="left:calc(var(--bleed) + 124px);flex-direction:column;justify-content:center;gap:12px">
     ${bName(d)}
     <div class="rule" style="width:34px"></div>
     ${bContact(d)}
   </div>
-  ${S.qr!=='off'?`<div style="position:absolute;right:calc(var(--bleed) + var(--pad));bottom:calc(var(--bleed) + var(--pad))">${bQR(d,48)}</div>`:''}`;},
+  ${S.qr!=='off'?`<div style="position:absolute;right:var(--bleed);bottom:var(--bleed)">${bQR(d,48)}</div>`:''}`;},
 
 photo(d){ return `<div class="safe" style="align-items:center;gap:18px">
     <div style="flex:0 0 auto">${bImg(d,Math.min(S.imgsize+20,118),true)}</div>
@@ -504,15 +475,15 @@ fullcolor(d){
   <div class="safe" style="flex-direction:column;justify-content:space-between;color:${fg}">
     <div style="display:flex;justify-content:space-between;align-items:flex-start">
       <div>
-        <div class="fm" style="color:${fg};">${esc(d.firma)}</div>
+        <div class="fm" style="color:${fg};opacity:.85">${esc(d.firma)}</div>
         <div style="height:12px"></div>
         <div class="nm" style="color:${fg}">${esc(d.vorname)} ${esc(d.nachname)}
-          ${d.titel?`<small style="color:${fg}">${esc(d.titel)}</small>`:''}</div>
+          ${d.titel?`<small style="color:${fg};opacity:.8">${esc(d.titel)}</small>`:''}</div>
       </div>
       ${S.img?`<img src="${S.img}" style="width:${Math.min(S.imgsize,58)}px;height:${Math.min(S.imgsize,58)}px;object-fit:contain">`:''}
     </div>
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
-      <div class="ct" style="color:${fg}">
+      <div class="ct" style="color:${fg};opacity:.92">
         ${d.strasse?`<div>${esc(d.strasse)}</div>`:''}
         ${(d.plz||d.ort)?`<div>${esc(d.plz)} ${esc(d.ort)}</div>`:''}
         ${d.tel?`<div>T ${esc(d.tel)}</div>`:''}
@@ -535,7 +506,7 @@ diagonal(d){
       <div class="fm" style="color:${fg}">${esc(d.firma)}</div>
       <div style="height:9px"></div>
       <div class="nm" style="color:${fg}">${esc(d.vorname)} ${esc(d.nachname)}
-        ${d.titel?`<small style="color:${fg}">${esc(d.titel)}</small>`:''}</div>
+        ${d.titel?`<small style="color:${fg};opacity:.85">${esc(d.titel)}</small>`:''}</div>
     </div>
     <div style="display:flex;justify-content:flex-end;align-items:flex-end;gap:12px">
       ${bContact(d,'right')}
@@ -545,11 +516,10 @@ diagonal(d){
 
 qrfocus(d){ return `
   <div style="position:absolute;right:0;top:0;bottom:0;width:calc(var(--bleed) + 128px);background:var(--acc)"></div>
-  <div style="position:absolute;right:var(--bleed);top:calc(var(--bleed) + var(--pad));bottom:calc(var(--bleed) + var(--pad));width:128px;
+  <div style="position:absolute;right:var(--bleed);top:var(--bleed);bottom:var(--bleed);width:128px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px">
     ${S.qr!=='off'?bQR(d,86):bImg(d,86,false)}
-    <div style="font-size:8.6px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
-      color:${isDark(S.acc)?'#ffffff':'#101317'}">Scannen &amp; speichern</div>
+    ${bQRLabel(isDark(S.acc)?'#ffffff':'#101317')}
   </div>
   <div class="safe" style="right:calc(var(--bleed) + 144px);flex-direction:column;justify-content:center;gap:11px">
     ${bFirma(d)}
@@ -561,12 +531,12 @@ qrfocus(d){ return `
 band(d){
   const fg = isDark(S.acc)?'#ffffff':'#101317';
   return `<div style="position:absolute;left:0;right:0;bottom:0;height:calc(var(--bleed) + 74px);background:var(--acc)"></div>
-  <div class="safe" style="bottom:calc(var(--bleed) + 84px);flex-direction:column;justify-content:center;gap:10px">
+  <div class="safe" style="bottom:calc(var(--bleed) + 74px);flex-direction:column;justify-content:center;gap:10px">
     ${bFirma(d)}
     ${bName(d)}
     ${d.slogan?`<div class="slog">${esc(d.slogan)}</div>`:''}
   </div>
-  <div style="position:absolute;left:calc(var(--bleed) + var(--pad));right:calc(var(--bleed) + var(--pad));bottom:calc(var(--bleed) + 7px);height:60px;
+  <div style="position:absolute;left:var(--bleed);right:var(--bleed);bottom:var(--bleed);height:60px;
     display:flex;align-items:center;justify-content:space-between;gap:12px;color:${fg}">
     ${bImg(d,52,false)}
     <div class="ct" style="color:${fg};text-align:right;flex:1">
@@ -610,7 +580,7 @@ frame(d){ return `
       display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;
       color:var(--acc);letter-spacing:.04em">${esc(initials(d))}</div>
     ${bName(d,'center')}
-    ${d.firma?`<div style="font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)">${esc(d.firma)}</div>`:''}
+    ${d.firma?`<div style="font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft)">${esc(d.firma)}</div>`:''}
     <div style="display:flex;align-items:center;gap:8px;margin:2px 0">
       <div style="width:26px;height:1px;background:var(--acc);opacity:.6"></div>
       <div style="width:4px;height:4px;background:var(--acc);transform:rotate(45deg)"></div>
@@ -625,32 +595,30 @@ frame(d){ return `
    RÜCKSEITE
    ============================================================ */
 function renderBack(d){
-  const bb = S.backbg || S.acc;
-  const fg = isDark(bb)?'#ffffff':'#101317';
+  const fg = isDark(S.acc)?'#ffffff':'#101317';
   switch(S.backstyle){
-    case 'logo': return `<div style="position:absolute;inset:0;background:${bb}"></div>
+    case 'logo': return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
       <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:14px;color:${fg}">
-        ${S.img?`<img src="${S.img}" style="width:${S.backimg*1.6}px;max-width:100%;height:${S.backimg}px;object-fit:contain">`:
+        ${S.img?`<img src="${S.img}" style="width:${Math.min(S.imgsize+30,130)}px;height:${Math.min(S.imgsize+30,130)}px;object-fit:contain">`:
           `<div style="font-size:56px;font-weight:700;letter-spacing:.08em;color:${fg}">${esc(initials(d))}</div>`}
-        ${d.firma?`<div style="font-size:11.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:${fg}">${esc(d.firma)}</div>`:''}
+        ${d.firma?`<div style="font-size:10.5px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:${fg};opacity:.9">${esc(d.firma)}</div>`:''}
       </div>`;
-    case 'slogan': return `<div style="position:absolute;inset:0;background:${bb}"></div>
+    case 'slogan': return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
       <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;
         text-align:center;padding:0 42px;gap:16px;color:${fg}">
         <div style="font-size:19px;line-height:1.4;font-weight:600">${esc(d.slogan||d.firma)}</div>
         <div style="width:40px;height:2px;background:${fg};opacity:.6"></div>
-        ${d.web?`<div style="font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase">${esc(d.web)}</div>`:''}
+        ${d.web?`<div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.9">${esc(d.web)}</div>`:''}
       </div>`;
-    case 'qr': return `<div style="position:absolute;inset:0;background:${S.backbg||S.bg}"></div><div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:12px">
+    case 'qr': return `<div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:12px">
         ${S.qr!=='off'?bQR(d,140):bImg(d,120,false)}
-        <div style="font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)">
-          ${S.qr==='vcard'?'Kontakt speichern':'Mehr erfahren'}</div>
+        ${bQRLabel('var(--soft)')}
       </div>`;
-    case 'contact': return `<div style="position:absolute;inset:0;background:${S.backbg||S.bg}"></div>
+    case 'contact': return `
       <div style="position:absolute;left:0;right:0;top:0;height:calc(var(--bleed) + 5px);background:var(--acc)"></div>
       <div class="safe" style="flex-direction:column;justify-content:center;gap:9px;padding-left:6px">
         ${bFirma(d)}
-        <div class="ct" style="line-height:1.8">
+        <div class="ct" style="font-size:10.5px;line-height:1.9">
           ${d.strasse?`<div><b>Adr</b> ${esc(d.strasse)}, ${esc(d.plz)} ${esc(d.ort)}</div>`:''}
           ${d.tel?`<div><b>Tel</b> ${esc(d.tel)}</div>`:''}
           ${d.mobil?`<div><b>Mob</b> ${esc(d.mobil)}</div>`:''}
@@ -659,9 +627,9 @@ function renderBack(d){
         </div>
       </div>
       ${S.qr!=='off'?`<div style="position:absolute;right:calc(var(--bleed) + 4px);bottom:calc(var(--bleed) + 4px)">${bQR(d,60)}</div>`:''}`;
-    default: return `<div style="position:absolute;inset:0;background:${bb}"></div>
+    default: return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
       <div style="position:absolute;right:-50px;bottom:-70px;width:230px;height:230px;border-radius:50%;
-        background:${isDark(bb)?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)'}"></div>`;
+        background:${isDark(S.acc)?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)'}"></div>`;
   }
 }
 
@@ -672,28 +640,22 @@ function applyVars(el){
   el.style.setProperty('--acc',S.acc);
   el.style.setProperty('--bg',S.bg);
   el.style.setProperty('--ink',S.ink);
-  el.style.setProperty('--soft', S.txtmode==='text' ? S.ink : (isDark(S.bg)?mix(S.ink,-8):mix(S.ink,12)));
+  el.style.setProperty('--soft',isDark(S.bg)?mix(S.ink,-28):mix(S.ink,42));
   el.style.setProperty('--ff',FONTS[S.font].v);
-  el.style.setProperty('--accs', S.txtmode==='text' ? S.ink : (S.txtmode==='sharp' && !isDark(S.bg)) ? mix(S.acc,-38) : S.acc);
   el.style.background = S.bg; el.style.color = S.ink;
 }
 function render(){
-  const d = view();
+  const d = data();
   const f = $('cardFront');
   applyVars(f);
   f.innerHTML = (RENDER[S.variant]||RENDER.minimal)(d) + (S.trim?'<div class="trim"></div>':'');
   f.querySelectorAll('.nm').forEach(n=>n.style.fontSize=S.size+'px');
-  f.querySelectorAll('.ct').forEach(n=>n.style.fontSize=S.ctsize+'px');
-  if(!d.vorname && !d.nachname && !d.firma && !S.img)
-    f.insertAdjacentHTML('beforeend','<div class="trim" style="border:0;display:flex;align-items:center;justify-content:center;color:#9aa2b1;font:13px sans-serif">Links deine Daten eingeben</div>');
 
   $('backStage').style.display = S.back?'flex':'none';
   if(S.back){
     const b = $('cardBack'); applyVars(b);
     b.innerHTML = renderBack(d) + (S.trim?'<div class="trim"></div>':'');
-    b.querySelectorAll('.ct').forEach(n=>n.style.fontSize=(S.ctsize+0.9)+'px');
   }
-  autosave();
 }
 
 /* ============================================================
@@ -706,7 +668,6 @@ $('varGrid').innerHTML = VARIANTS
 $('c_font').innerHTML = Object.entries(FONTS).map(([k,v])=>`<option value="${k}">${v.n}</option>`).join('');
 $('swAcc').innerHTML = SWATCH_ACC.map(c=>`<i data-t="acc" style="background:${c}" title="${c}"></i>`).join('');
 $('swBg').innerHTML  = SWATCH_BG.map(c=>`<i data-t="bg" style="background:${c}" title="${c}"></i>`).join('');
-$('swBack').innerHTML = [...new Set(SWATCH_BG.concat(SWATCH_ACC))].map(c=>`<i data-t="back" style="background:${c}" title="${c}"></i>`).join('');
 
 function applyStyle(k){
   const st = STYLES[k]; S.style=k;
@@ -721,19 +682,46 @@ function syncControls(){
   $('c_acc_t').textContent=S.acc; $('c_bg_t').textContent=S.bg; $('c_ink_t').textContent=S.ink;
   $('c_font').value=S.font; $('c_size').value=S.size; $('c_imgsize').value=S.imgsize;
   $('c_qr').value=S.qr; $('c_back').checked=S.back; $('c_backstyle').value=S.backstyle;
-  $('c_trim').checked=S.trim; $('c_txtmode').value=S.txtmode||'text';
-  const bb=S.backbg||S.acc; $('c_backbg').value=bb; $('c_backbg_t').textContent=S.backbg?S.backbg:'wie Akzent';
-  $('c_backimg').value=S.backimg; $('c_ctsize').value=S.ctsize; $('c_nowhite').checked=S.nowhite;
-  document.querySelectorAll('.shw').forEach(c=>c.checked=S.show[c.dataset.k]!==false);
+  $('c_trim').checked=S.trim;
+  $('c_qrlab').checked=S.qrlab; $('c_qrtext').value=S.qrtext;
+  $('c_qrpad').value=S.qrpad; $('c_qrpadV').textContent=S.qrpad;
+  $('c_gutter').value=S.gutter; $('c_gutterV').textContent=S.gutter+' mm';
+  $('c_cutmode').value=S.cutmode;
+  showContrast(); sheetInfo();
+}
+/* Wie viele Karten passen bei diesem Abstand auf A4? */
+function sheetLayout(){
+  const W=85,H=55,M=5,g=S.gutter;
+  const cols=Math.max(1,Math.floor((210-2*M+g)/(W+g)));
+  const rows=Math.max(1,Math.floor((297-2*M+g)/(H+g)));
+  const tw=cols*W+(cols-1)*g, th=rows*H+(rows-1)*g;
+  return {W,H,g,cols,rows,ox:(210-tw)/2,oy:(297-th)/2,n:cols*rows};
+}
+function sheetInfo(){
+  const L=sheetLayout();
+  let t = L.g===0
+    ? `Ohne Abstand: ${L.n} Karten, ein Schnitt bedient zwei Karten. Spart Papier, verzeiht aber keinen Versatz – bei dunklen Karten bleibt schnell ein weißer Streifen stehen.`
+    : `${L.g} mm Abstand: ${L.n} Karten pro Bogen. Jede Karte wird einzeln geschnitten, kleine Ungenauigkeiten fallen nicht auf.`;
+  if(L.n<10) t+=` Mit 3 mm passen wieder 10 Karten auf den Bogen.`;
+  $('sheetInfo').textContent=t;
 }
 
 $('styleChips').onclick = e => { const t=e.target.closest('.chip'); if(t) applyStyle(t.dataset.s); };
 $('varGrid').onclick    = e => { const t=e.target.closest('.vbtn'); if(t){ S.variant=t.dataset.v; syncControls(); render(); } };
 $('swAcc').onclick = e => { if(e.target.dataset.t){ S.acc=e.target.title; syncControls(); render(); } };
-$('swBg').onclick  = e => { if(e.target.dataset.t){ S.bg=e.target.title; S.ink=isDark(S.bg)?'#f4f6fa':'#000000'; syncControls(); render(); } };
+$('swBg').onclick  = e => { if(e.target.dataset.t){ S.bg=e.target.title; S.ink=isDark(S.bg)?'#f4f6fa':'#171c26'; syncControls(); render(); } };
 
 ['c_acc','c_bg','c_ink'].forEach(id=>$(id).oninput = e=>{
-  S[id.slice(2)] = e.target.value; syncControls(); render(); });
+  const key=id.slice(2);
+  S[key] = e.target.value;
+  guardContrast(key);          // verhindert Weiß auf Weiß
+  syncControls(); render(); });
+$('c_qrlab').onchange = e=>{ S.qrlab=e.target.checked; render(); };
+/* addEventListener, damit der allgemeine Textfeld-Handler weiter unten das nicht überschreibt */
+$('c_qrtext').addEventListener('input', e=>{ S.qrtext=e.target.value; render(); });
+$('c_qrpad').oninput  = e=>{ S.qrpad=+e.target.value; $('c_qrpadV').textContent=S.qrpad; render(); };
+$('c_gutter').oninput = e=>{ S.gutter=+e.target.value; $('c_gutterV').textContent=S.gutter+' mm'; sheetInfo(); };
+$('c_cutmode').onchange = e=>{ S.cutmode=e.target.value; };
 $('c_font').onchange  = e=>{ S.font=e.target.value; render(); };
 $('c_size').oninput   = e=>{ S.size=+e.target.value; render(); };
 $('c_imgsize').oninput= e=>{ S.imgsize=+e.target.value; render(); };
@@ -741,50 +729,6 @@ $('c_qr').onchange    = e=>{ S.qr=e.target.value; render(); };
 $('c_back').onchange  = e=>{ S.back=e.target.checked; render(); };
 $('c_backstyle').onchange = e=>{ S.backstyle=e.target.value; render(); };
 $('c_trim').onchange  = e=>{ S.trim=e.target.checked; render(); };
-$('c_txtmode').onchange = e=>{ S.txtmode=e.target.value; render(); };
-$('c_ctsize').oninput = e=>{ S.ctsize=+e.target.value; render(); };
-$('c_backimg').oninput= e=>{ S.backimg=+e.target.value; render(); };
-$('c_backbg').oninput = e=>{ S.backbg=e.target.value; syncControls(); render(); };
-$('swBack').onclick   = e=>{ if(e.target.dataset.t){ S.backbg=e.target.title; syncControls(); render(); } };
-$('backAcc').onclick  = ()=>{ S.backbg=null; syncControls(); render(); };
-document.querySelectorAll('.shw').forEach(c=>c.onchange=()=>{ S.show[c.dataset.k]=c.checked; render(); });
-$('c_nowhite').onchange = async e=>{ S.nowhite=e.target.checked; await prepImg(); render(); };
-
-/* Weißen Hintergrund aus dem Logo entfernen */
-function prepImg(){
-  return new Promise(res=>{
-    if(!S.imgRaw){ S.img=null; return res(); }
-    if(!S.nowhite){ S.img=S.imgRaw; return res(); }
-    const im=new Image();
-    im.onload=()=>{
-      const c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight;
-      const x=c.getContext('2d'); x.drawImage(im,0,0);
-      const W=c.width, H=c.height;
-      const px=x.getImageData(0,0,W,H), a=px.data;
-      const light = i => Math.min(a[i*4],a[i*4+1],a[i*4+2]);
-      const bg = new Uint8Array(W*H);            // 1 = gehört zum äußeren Hintergrund
-      const stack = [];
-      const push = (p)=>{ if(!bg[p] && light(p)>=228){ bg[p]=1; stack.push(p); } };
-      for(let i=0;i<W;i++){ push(i); push((H-1)*W+i); }
-      for(let j=0;j<H;j++){ push(j*W); push(j*W+W-1); }
-      while(stack.length){
-        const p=stack.pop(), px_=p%W, py=(p-px_)/W;
-        if(px_>0) push(p-1); if(px_<W-1) push(p+1);
-        if(py>0) push(p-W);  if(py<H-1) push(p+W);
-      }
-      for(let p=0;p<W*H;p++){
-        if(bg[p]){ a[p*4+3]=0; continue; }
-        // weiche Kante: helle Pixel direkt neben dem Hintergrund
-        const px_=p%W;
-        const nb=(px_>0&&bg[p-1])||(px_<W-1&&bg[p+1])||(p>=W&&bg[p-W])||(p<W*(H-1)&&bg[p+W]);
-        if(nb){ const m=light(p); if(m>=200) a[p*4+3]=Math.round(a[p*4+3]*(255-m)/55); }
-      }
-      x.putImageData(px,0,0); S.img=c.toDataURL('image/png'); res();
-    };
-    im.onerror=()=>{ S.img=S.imgRaw; res(); };
-    im.src=S.imgRaw;
-  });
-}
 
 document.querySelectorAll('.side input[type=text],.side input[type=email],.side input[type=tel]')
   .forEach(i=>i.oninput = render);
@@ -792,10 +736,10 @@ document.querySelectorAll('.side input[type=text],.side input[type=email],.side 
 $('up').onchange = e=>{
   const file = e.target.files[0]; if(!file) return;
   const r = new FileReader();
-  r.onload = async ev => { S.imgRaw = ev.target.result; $('fileName').textContent = file.name; await prepImg(); render(); };
+  r.onload = ev => { S.img = ev.target.result; $('fileName').textContent = file.name; render(); };
   r.readAsDataURL(file);
 };
-$('clearImg').onclick = ()=>{ S.img=null; S.imgRaw=null; $('up').value=''; $('fileName').textContent='Kein Bild geladen'; render(); };
+$('clearImg').onclick = ()=>{ S.img=null; $('up').value=''; $('fileName').textContent='Kein Bild geladen'; render(); };
 
 $('randomize').onclick = ()=>{
   const sk = Object.keys(STYLES), vk = VARIANTS.map(v=>v.id);
@@ -804,38 +748,21 @@ $('randomize').onclick = ()=>{
 };
 
 /* Speichern / Laden */
-const FIELDMAP={vorname:'f_vorname',nachname:'f_nachname',titel:'f_titel',firma:'f_firma',
-  strasse:'f_strasse',plz:'f_plz',ort:'f_ort',tel:'f_tel',mobil:'f_mobil',
-  mail:'f_mail',web:'f_web',slogan:'f_slogan'};
-function store(key){
-  try{ localStorage.setItem(key, JSON.stringify({d:data(),s:S})); return true; }
-  catch(e){ // Bild zu groß für den Speicher -> ohne Bild sichern
-    try{ const s2=Object.assign({},S,{img:null,imgRaw:null});
-      localStorage.setItem(key, JSON.stringify({d:data(),s:s2})); }catch(e2){}
-    return false; }
-}
-let ast; function autosave(){ clearTimeout(ast); ast=setTimeout(()=>store('vk_auto'),400); }
-$('saveTpl').onclick = ()=>{ toast(store('vk_data')?'Gespeichert':'Gespeichert (ohne Bild – zu groß)'); };
-function restore(key){
-  const raw = localStorage.getItem(key); if(!raw) return false;
-  const o = JSON.parse(raw);
-  Object.entries(FIELDMAP).forEach(([k,id])=>{ if(o.d && o.d[k]!==undefined) $(id).value=o.d[k]; });
-  Object.assign(S,o.s); if(!(S.ctsize>=10)) S.ctsize=12; if(!S.txtmode) S.txtmode='text'; delete S.sharp; S.show=Object.assign({},DEFAULT_S.show,o.s.show||{});
-  $('styleHint').textContent=STYLES[S.style]?.h||'';
-  $('fileName').textContent = S.img?'Bild geladen':'Kein Bild geladen';
-  syncControls(); render(); return true;
-}
-$('resetAll').onclick = ()=>{
-  if(!confirm('Alle Eingaben und Einstellungen löschen?')) return;
-  Object.values(FIELDMAP).forEach(id=>$(id).value='');
-  Object.assign(S, JSON.parse(JSON.stringify(DEFAULT_S)));
-  $('up').value=''; $('fileName').textContent='Kein Bild geladen'; $('styleHint').textContent='';
-  try{ localStorage.removeItem('vk_auto'); }catch(e){}
-  syncControls(); render(); toast('Alles geleert');
+$('saveTpl').onclick = ()=>{
+  try{ localStorage.setItem('vk_data', JSON.stringify({d:data(),s:S}));
+       toast('Gespeichert'); }catch(e){ toast('Speichern nicht möglich'); }
 };
 $('loadTpl').onclick = ()=>{
-  try{ toast(restore('vk_data')?'Geladen':'Nichts gespeichert'); }
-  catch(e){ toast('Laden fehlgeschlagen'); }
+  try{
+    const raw = localStorage.getItem('vk_data'); if(!raw) return toast('Nichts gespeichert');
+    const o = JSON.parse(raw);
+    const map={vorname:'f_vorname',nachname:'f_nachname',titel:'f_titel',firma:'f_firma',
+      strasse:'f_strasse',plz:'f_plz',ort:'f_ort',tel:'f_tel',mobil:'f_mobil',
+      mail:'f_mail',web:'f_web',slogan:'f_slogan'};
+    Object.entries(map).forEach(([k,id])=>{ if(o.d[k]!==undefined) $(id).value=o.d[k]; });
+    Object.assign(S,o.s); $('styleHint').textContent=STYLES[S.style]?.h||'';
+    syncControls(); render(); toast('Geladen');
+  }catch(e){ toast('Laden fehlgeschlagen'); }
 };
 
 let tt;
@@ -854,7 +781,6 @@ function ready(needPdf){
   return true;
 }
 async function shoot(el){
-  try{ if(document.fonts && document.fonts.ready) await document.fonts.ready; }catch(e){}
   el.classList.add('exporting');
   const cv = await html2canvas(el,{scale:SCALE,backgroundColor:null,logging:false,useCORS:true});
   el.classList.remove('exporting');
@@ -899,28 +825,41 @@ $('pdf10').onclick = async ()=>{
   toast('Druckbogen wird erstellt …');
   const {jsPDF} = window.jspdf;
   const pdf = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=85,H=55, cols=2, rows=5;
-  const ox = (210-cols*W)/2, oy = (297-rows*H)/2;
+  const {W,H,g,cols,rows,ox,oy,n} = sheetLayout();
+  // Ohne Abstand würden Eckmarken über die Nachbarkarte laufen
+  const mode = (S.cutmode==='marks' && g===0) ? 'lines' : S.cutmode;
   const place = (img)=>{
     for(let r=0;r<rows;r++) for(let c=0;c<cols;c++)
-      pdf.addImage(img,'PNG',ox+c*W,oy+r*H,W,H,undefined,'FAST');
-    pdf.setDrawColor(160); pdf.setLineWidth(0.08);
-    for(let r=0;r<=rows;r++){ const y=oy+r*H; pdf.line(8,y,202,y); }
-    for(let c=0;c<=cols;c++){ const x=ox+c*W; pdf.line(x,8,x,289); }
+      pdf.addImage(img,'PNG',ox+c*(W+g),oy+r*(H+g),W,H,undefined,'FAST');
+    if(mode==='none') return;
+    pdf.setDrawColor(140); pdf.setLineWidth(0.08);
+    if(mode==='lines'){
+      for(let r=0;r<rows;r++){ const y=oy+r*(H+g);
+        pdf.line(4,y,206,y); pdf.line(4,y+H,206,y+H); }
+      for(let c=0;c<cols;c++){ const x=ox+c*(W+g);
+        pdf.line(x,4,x,293); pdf.line(x+W,4,x+W,293); }
+    } else {
+      const L=Math.min(g*0.8,3), gap=0.5;
+      for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+        const x=ox+c*(W+g), y=oy+r*(H+g);
+        [[x,y,-1,-1],[x+W,y,1,-1],[x,y+H,-1,1],[x+W,y+H,1,1]].forEach(([px,py,dx,dy])=>{
+          pdf.line(px+dx*gap,py,px+dx*L,py);      // waagerechte Marke
+          pdf.line(px,py+dy*gap,px,py+dy*L);      // senkrechte Marke
+        });
+      }
+    }
   };
   place(await shootTrim($('cardFront')));
   if(S.back){ pdf.addPage('a4','portrait'); place(await shootTrim($('cardBack'))); }
   pdf.save('visitenkarten-a4-bogen.pdf');
-  toast('A4-Bogen gespeichert (10 Karten, Schnittlinien)');
+  toast(`A4-Bogen gespeichert – ${n} Karten, ${g} mm Abstand`);
 };
 
 /* ============================================================
    START
    ============================================================ */
-if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>render());
-let restored=false;
-try{ restored = restore('vk_auto'); }catch(e){}
-if(!restored){ syncControls(); render(); }
+applyStyle('professionell');
+S.variant='sidebar'; syncControls(); render();
 </script>
 </body>
 </html>
