@@ -30,6 +30,9 @@
     border-radius:7px;padding:7px 9px;font:inherit;font-size:13px}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ui-acc)}
   .row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
+  .sl{display:flex;align-items:center;gap:10px;margin-top:4px}
+  .sl input[type=range]{flex:1}
+  .sl b{font-size:12px;min-width:52px;text-align:right;color:var(--ui-text)}
   .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
   .chip{border:1px solid var(--ui-line);background:var(--ui-panel2);color:var(--ui-dim);
     border-radius:20px;padding:5px 11px;font-size:12px;cursor:pointer;user-select:none}
@@ -102,23 +105,23 @@
   <fieldset>
     <legend>Kontaktdaten</legend>
     <div class="row">
-      <div><label>Vorname</label><input type="text" id="f_vorname" value="Ramona"></div>
-      <div><label>Nachname</label><input type="text" id="f_nachname" value="Bergmann"></div>
+      <div><label>Vorname</label><input type="text" id="f_vorname" value="Nivora"></div>
+      <div><label>Nachname</label><input type="text" id="f_nachname" value="Graufeder"></div>
     </div>
-    <label>Position / Titel</label><input type="text" id="f_titel" value="Autorin &amp; Investorin">
-    <label>Firma</label><input type="text" id="f_firma" value="Bergmann Media">
-    <label>Straße &amp; Hausnummer</label><input type="text" id="f_strasse" value="Lindenallee 24">
+    <label>Position / Titel</label><input type="text" id="f_titel" value="Autorin / Content Creatorin">
+    <label>Firma</label><input type="text" id="f_firma" value="Zwergenbibliothek">
+    <label>Straße &amp; Hausnummer</label><input type="text" id="f_strasse" value="Karl-Kippenhahn-Str. 17">
     <div class="row">
-      <div style="flex:0 0 90px"><label>PLZ</label><input type="text" id="f_plz" value="10115"></div>
-      <div><label>Ort</label><input type="text" id="f_ort" value="Berlin"></div>
+      <div style="flex:0 0 90px"><label>PLZ</label><input type="text" id="f_plz" value="08058"></div>
+      <div><label>Ort</label><input type="text" id="f_ort" value="Zwickau"></div>
     </div>
     <div class="row">
-      <div><label>Telefon</label><input type="tel" id="f_tel" value="+49 30 1234567"></div>
-      <div><label>Mobil</label><input type="tel" id="f_mobil" value="+49 170 9876543"></div>
+      <div><label>Telefon</label><input type="tel" id="f_tel" value=""></div>
+      <div><label>Mobil</label><input type="tel" id="f_mobil" value="+49 176 64790714"></div>
     </div>
-    <label>E-Mail</label><input type="email" id="f_mail" value="kontakt@bergmann-media.de">
-    <label>Webseite</label><input type="text" id="f_web" value="www.bergmann-media.de">
-    <label>Slogan / Claim (optional)</label><input type="text" id="f_slogan" value="Bücher. Ideen. Wachstum.">
+    <label>E-Mail</label><input type="email" id="f_mail" value="sachsenstyle@t-online.de">
+    <label>Webseite</label><input type="text" id="f_web" value="zwergenbibliothek.wordpress.com">
+    <label>Slogan / Claim (optional)</label><input type="text" id="f_slogan" value="">
   </fieldset>
 
   <fieldset>
@@ -186,12 +189,16 @@
       <option value="contact">Kontaktdaten komplett</option>
       <option value="plain">Nur Farbfläche</option>
     </select>
+    <label class="chk"><input type="checkbox" id="c_backname" checked> Firmenname unter dem Logo anzeigen</label>
+    <div class="hint">Abschalten, wenn der Name schon in deiner Logo-Datei steht – sonst steht er zweimal da.</div>
+    <label>Logo-Größe auf der Rückseite</label>
+    <div class="sl"><input type="range" id="c_backsize" min="70" max="300" value="130"><b id="c_backsizeV">130</b></div>
   </fieldset>
 
   <fieldset>
     <legend>7 &middot; Export</legend>
-    <label>Abstand zwischen den Karten auf dem A4-Bogen</label>
-    <div class="sl"><input type="range" id="c_gutter" min="0" max="8" value="3"><b id="c_gutterV">3 mm</b></div>
+    <label>Schnittabstand zwischen den Karten</label>
+    <div class="sl"><input type="range" id="c_gutter" min="0" max="12" value="5"><b id="c_gutterV">5 mm</b></div>
     <label>Schnitthilfe auf dem Bogen</label>
     <select id="c_cutmode">
       <option value="marks" selected>Eckmarken (sauberster Druck)</option>
@@ -283,8 +290,8 @@ const S = {
   acc:'#0f4c81', bg:'#ffffff', ink:'#171c26', font:'sans',
   size:22, img:null, imgsize:80, qr:'web',
   qrlab:false, qrtext:'Scannen & speichern', qrpad:5,
-  back:true, backstyle:'logo', trim:true,
-  gutter:3, cutmode:'marks'
+  back:true, backstyle:'logo', backname:true, backsize:130, trim:true,
+  gutter:5, cutmode:'marks'
 };
 
 const $ = id => document.getElementById(id);
@@ -318,7 +325,7 @@ function contrast(a,b){
   const l1=relLum(a),l2=relLum(b);
   return (Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05);
 }
-/* Nach jeder Farbänderung prüfen – und Unlesbares gar nicht erst entstehen lassen */
+/* Verhindert, dass Text und Hintergrund gleich hell werden */
 function guardContrast(changed){
   if(changed==='bg' && contrast(S.ink,S.bg)<3)
     S.ink = isDark(S.bg) ? '#f4f6fa' : '#171c26';
@@ -329,13 +336,12 @@ function showContrast(){
   const w=[], cTx=contrast(S.ink,S.bg), cAc=contrast(S.acc,S.bg);
   if(cTx<4.5) w.push(`Text und Hintergrund haben zu wenig Kontrast (${cTx.toFixed(1)}:1). Gedruckt wird das schwer lesbar – empfohlen sind mindestens 4,5:1.`);
   if(cAc<3)   w.push(`Die Akzentfarbe hebt sich kaum vom Hintergrund ab (${cAc.toFixed(1)}:1). Firmenname und Beschriftungen gehen unter.`);
-  const el=$('ctWarn');
-  el.innerHTML = w.length
+  $('ctWarn').innerHTML = w.length
     ? w.map(t=>`<div style="background:rgba(255,181,71,.13);border:1px solid rgba(255,181,71,.4);
         color:#ffd79a;border-radius:7px;padding:8px 10px;font-size:11.5px;line-height:1.5;margin-top:8px">${t}</div>`).join('')
     : `<div style="font-size:11px;color:#7fd6a8;margin-top:8px">Kontrast in Ordnung (${cTx.toFixed(1)}:1).</div>`;
 }
-function mix(hex,pct){ // pct>0 heller, <0 dunkler
+function mix(hex,pct){
   const c=hex.replace('#',''); let r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);
   const t = pct>0?255:0, p=Math.abs(pct)/100;
   r=Math.round(r+(t-r)*p); g=Math.round(g+(t-g)*p); b=Math.round(b+(t-b)*p);
@@ -399,7 +405,6 @@ function bQR(d,px=58){
   const u = qrDataURL(d); if(!u) return '';
   return `<div class="qrbox" style="padding:${S.qrpad}px"><img src="${u}" style="width:${px}px;height:${px}px"></div>`;
 }
-/* Beschriftung unter dem QR-Code – nur wenn gewünscht */
 function bQRLabel(col){
   if(!S.qrlab || S.qr==='off' || !S.qrtext.trim()) return '';
   return `<div style="font-size:8px;letter-spacing:.15em;text-transform:uppercase;
@@ -407,7 +412,6 @@ function bQRLabel(col){
 }
 function bImg(d,size,round){
   if(S.img) return `<img src="${S.img}" class="${round?'avatar':'logo'}" style="width:${size}px;height:${size}px">`;
-  // Fallback: Monogramm-Grafik
   return `<div style="width:${size}px;height:${size}px;border-radius:${round?'50%':'8px'};
     background:var(--acc);color:${isDark(S.acc)?'#fff':'#000'};display:flex;align-items:center;
     justify-content:center;font-size:${Math.round(size*0.38)}px;font-weight:700;letter-spacing:.04em">${esc(initials(d))}</div>`;
@@ -594,14 +598,20 @@ frame(d){ return `
 /* ============================================================
    RÜCKSEITE
    ============================================================ */
+function backLogo(d){
+  const s = S.backsize;
+  if(S.img) return `<img src="${S.img}" style="max-width:${s}px;max-height:${Math.round(s*0.78)}px;
+    width:auto;height:auto;object-fit:contain">`;
+  return `<div style="font-size:${Math.round(s*0.42)}px;font-weight:700;letter-spacing:.08em">${esc(initials(d))}</div>`;
+}
 function renderBack(d){
   const fg = isDark(S.acc)?'#ffffff':'#101317';
   switch(S.backstyle){
     case 'logo': return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
       <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:14px;color:${fg}">
-        ${S.img?`<img src="${S.img}" style="width:${Math.min(S.imgsize+30,130)}px;height:${Math.min(S.imgsize+30,130)}px;object-fit:contain">`:
-          `<div style="font-size:56px;font-weight:700;letter-spacing:.08em;color:${fg}">${esc(initials(d))}</div>`}
-        ${d.firma?`<div style="font-size:10.5px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:${fg};opacity:.9">${esc(d.firma)}</div>`:''}
+        ${backLogo(d)}
+        ${(S.backname && d.firma)?`<div style="font-size:10.5px;font-weight:700;letter-spacing:.24em;
+          text-transform:uppercase;color:${fg};opacity:.9">${esc(d.firma)}</div>`:''}
       </div>`;
     case 'slogan': return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
       <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;
@@ -659,6 +669,34 @@ function render(){
 }
 
 /* ============================================================
+   A4-BOGEN: Aufteilung berechnen
+   ============================================================ */
+function sheetLayout(){
+  const W=85,H=55,M=5,g=S.gutter;
+  const passt=(pw,ph)=>{
+    const cols=Math.max(1,Math.floor((pw-2*M+g)/(W+g)));
+    const rows=Math.max(1,Math.floor((ph-2*M+g)/(H+g)));
+    const tw=cols*W+(cols-1)*g, th=rows*H+(rows-1)*g;
+    if(tw>pw-2*M+0.001 || th>ph-2*M+0.001) return null;
+    return {cols,rows,n:cols*rows,pw,ph,ox:(pw-tw)/2,oy:(ph-th)/2};
+  };
+  const hoch=passt(210,297), quer=passt(297,210);
+  let best=hoch;
+  if(quer && (!best || quer.n>best.n)) best=quer;
+  if(!best) best={cols:1,rows:1,n:1,pw:210,ph:297,ox:62.5,oy:121};
+  return {W,H,g,...best,quer:best===quer};
+}
+function sheetInfo(){
+  const L=sheetLayout();
+  const fmt=L.quer?'A4 quer':'A4 hoch';
+  let t = L.g===0
+    ? `Ohne Abstand: ${L.n} Karten auf ${fmt}. Ein Schnitt bedient zwei Karten – spart Papier, verzeiht aber keinen Versatz. Bei dunklen Karten bleibt schnell ein weißer Streifen stehen.`
+    : `${L.g} mm Abstand: ${L.n} Karten auf ${fmt} (${L.cols} × ${L.rows}). Jede Karte wird einzeln geschnitten, kleine Ungenauigkeiten fallen nicht auf.`;
+  if(L.g>0 && L.g<3) t+=` Für bequemes Schneiden sind 4 bis 6 mm angenehmer.`;
+  $('sheetInfo').textContent=t;
+}
+
+/* ============================================================
    UI AUFBAU
    ============================================================ */
 $('styleChips').innerHTML = Object.entries(STYLES)
@@ -685,53 +723,42 @@ function syncControls(){
   $('c_trim').checked=S.trim;
   $('c_qrlab').checked=S.qrlab; $('c_qrtext').value=S.qrtext;
   $('c_qrpad').value=S.qrpad; $('c_qrpadV').textContent=S.qrpad;
+  $('c_backname').checked=S.backname;
+  $('c_backsize').value=S.backsize; $('c_backsizeV').textContent=S.backsize;
   $('c_gutter').value=S.gutter; $('c_gutterV').textContent=S.gutter+' mm';
   $('c_cutmode').value=S.cutmode;
   showContrast(); sheetInfo();
-}
-/* Wie viele Karten passen bei diesem Abstand auf A4? */
-function sheetLayout(){
-  const W=85,H=55,M=5,g=S.gutter;
-  const cols=Math.max(1,Math.floor((210-2*M+g)/(W+g)));
-  const rows=Math.max(1,Math.floor((297-2*M+g)/(H+g)));
-  const tw=cols*W+(cols-1)*g, th=rows*H+(rows-1)*g;
-  return {W,H,g,cols,rows,ox:(210-tw)/2,oy:(297-th)/2,n:cols*rows};
-}
-function sheetInfo(){
-  const L=sheetLayout();
-  let t = L.g===0
-    ? `Ohne Abstand: ${L.n} Karten, ein Schnitt bedient zwei Karten. Spart Papier, verzeiht aber keinen Versatz – bei dunklen Karten bleibt schnell ein weißer Streifen stehen.`
-    : `${L.g} mm Abstand: ${L.n} Karten pro Bogen. Jede Karte wird einzeln geschnitten, kleine Ungenauigkeiten fallen nicht auf.`;
-  if(L.n<10) t+=` Mit 3 mm passen wieder 10 Karten auf den Bogen.`;
-  $('sheetInfo').textContent=t;
 }
 
 $('styleChips').onclick = e => { const t=e.target.closest('.chip'); if(t) applyStyle(t.dataset.s); };
 $('varGrid').onclick    = e => { const t=e.target.closest('.vbtn'); if(t){ S.variant=t.dataset.v; syncControls(); render(); } };
 $('swAcc').onclick = e => { if(e.target.dataset.t){ S.acc=e.target.title; syncControls(); render(); } };
-$('swBg').onclick  = e => { if(e.target.dataset.t){ S.bg=e.target.title; S.ink=isDark(S.bg)?'#f4f6fa':'#171c26'; syncControls(); render(); } };
+$('swBg').onclick  = e => { if(e.target.dataset.t){ S.bg=e.target.title; guardContrast('bg'); syncControls(); render(); } };
 
 ['c_acc','c_bg','c_ink'].forEach(id=>$(id).oninput = e=>{
   const key=id.slice(2);
   S[key] = e.target.value;
-  guardContrast(key);          // verhindert Weiß auf Weiß
+  guardContrast(key);
   syncControls(); render(); });
-$('c_qrlab').onchange = e=>{ S.qrlab=e.target.checked; render(); };
-/* addEventListener, damit der allgemeine Textfeld-Handler weiter unten das nicht überschreibt */
-$('c_qrtext').addEventListener('input', e=>{ S.qrtext=e.target.value; render(); });
-$('c_qrpad').oninput  = e=>{ S.qrpad=+e.target.value; $('c_qrpadV').textContent=S.qrpad; render(); };
-$('c_gutter').oninput = e=>{ S.gutter=+e.target.value; $('c_gutterV').textContent=S.gutter+' mm'; sheetInfo(); };
-$('c_cutmode').onchange = e=>{ S.cutmode=e.target.value; };
+
 $('c_font').onchange  = e=>{ S.font=e.target.value; render(); };
 $('c_size').oninput   = e=>{ S.size=+e.target.value; render(); };
 $('c_imgsize').oninput= e=>{ S.imgsize=+e.target.value; render(); };
 $('c_qr').onchange    = e=>{ S.qr=e.target.value; render(); };
 $('c_back').onchange  = e=>{ S.back=e.target.checked; render(); };
 $('c_backstyle').onchange = e=>{ S.backstyle=e.target.value; render(); };
+$('c_backname').onchange  = e=>{ S.backname=e.target.checked; render(); };
+$('c_backsize').oninput   = e=>{ S.backsize=+e.target.value; $('c_backsizeV').textContent=S.backsize; render(); };
 $('c_trim').onchange  = e=>{ S.trim=e.target.checked; render(); };
+$('c_qrlab').onchange = e=>{ S.qrlab=e.target.checked; render(); };
+$('c_qrpad').oninput  = e=>{ S.qrpad=+e.target.value; $('c_qrpadV').textContent=S.qrpad; render(); };
+$('c_gutter').oninput = e=>{ S.gutter=+e.target.value; $('c_gutterV').textContent=S.gutter+' mm'; sheetInfo(); };
+$('c_cutmode').onchange = e=>{ S.cutmode=e.target.value; };
+/* addEventListener, damit der allgemeine Textfeld-Handler weiter unten das nicht überschreibt */
+$('c_qrtext').addEventListener('input', e=>{ S.qrtext=e.target.value; render(); });
 
 document.querySelectorAll('.side input[type=text],.side input[type=email],.side input[type=tel]')
-  .forEach(i=>i.oninput = render);
+  .forEach(i=>i.addEventListener('input', render));
 
 $('up').onchange = e=>{
   const file = e.target.files[0]; if(!file) return;
@@ -760,7 +787,7 @@ $('loadTpl').onclick = ()=>{
       strasse:'f_strasse',plz:'f_plz',ort:'f_ort',tel:'f_tel',mobil:'f_mobil',
       mail:'f_mail',web:'f_web',slogan:'f_slogan'};
     Object.entries(map).forEach(([k,id])=>{ if(o.d[k]!==undefined) $(id).value=o.d[k]; });
-    Object.assign(S,o.s); $('styleHint').textContent=STYLES[S.style]?.h||'';
+    Object.assign(S,o.s); $('styleHint').textContent=(STYLES[S.style]||{}).h||'';
     syncControls(); render(); toast('Geladen');
   }catch(e){ toast('Laden fehlgeschlagen'); }
 };
@@ -772,7 +799,7 @@ function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('on');
 /* ============================================================
    EXPORT
    ============================================================ */
-const SCALE = 6;               // 455px * 6 = 2730px auf 91mm -> weit über 300 dpi
+const SCALE = 6;
 function ready(needPdf){
   if(typeof html2canvas==='undefined' || (needPdf && !window.jspdf)){
     toast('Export-Bibliotheken nicht geladen – bitte einmal mit Internetverbindung öffnen.');
@@ -824,8 +851,10 @@ $('pdf10').onclick = async ()=>{
   if(!ready(true)) return;
   toast('Druckbogen wird erstellt …');
   const {jsPDF} = window.jspdf;
-  const pdf = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const {W,H,g,cols,rows,ox,oy,n} = sheetLayout();
+  const L = sheetLayout();
+  const ausricht = L.quer?'landscape':'portrait';
+  const pdf = new jsPDF({orientation:ausricht,unit:'mm',format:'a4'});
+  const {W,H,g,cols,rows,ox,oy,pw,ph,n} = L;
   // Ohne Abstand würden Eckmarken über die Nachbarkarte laufen
   const mode = (S.cutmode==='marks' && g===0) ? 'lines' : S.cutmode;
   const place = (img)=>{
@@ -835,22 +864,22 @@ $('pdf10').onclick = async ()=>{
     pdf.setDrawColor(140); pdf.setLineWidth(0.08);
     if(mode==='lines'){
       for(let r=0;r<rows;r++){ const y=oy+r*(H+g);
-        pdf.line(4,y,206,y); pdf.line(4,y+H,206,y+H); }
+        pdf.line(4,y,pw-4,y); pdf.line(4,y+H,pw-4,y+H); }
       for(let c=0;c<cols;c++){ const x=ox+c*(W+g);
-        pdf.line(x,4,x,293); pdf.line(x+W,4,x+W,293); }
+        pdf.line(x,4,x,ph-4); pdf.line(x+W,4,x+W,ph-4); }
     } else {
-      const L=Math.min(g*0.8,3), gap=0.5;
+      const Lm=Math.min(g*0.8,3), gap=0.5;
       for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
         const x=ox+c*(W+g), y=oy+r*(H+g);
         [[x,y,-1,-1],[x+W,y,1,-1],[x,y+H,-1,1],[x+W,y+H,1,1]].forEach(([px,py,dx,dy])=>{
-          pdf.line(px+dx*gap,py,px+dx*L,py);      // waagerechte Marke
-          pdf.line(px,py+dy*gap,px,py+dy*L);      // senkrechte Marke
+          pdf.line(px+dx*gap,py,px+dx*Lm,py);
+          pdf.line(px,py+dy*gap,px,py+dy*Lm);
         });
       }
     }
   };
   place(await shootTrim($('cardFront')));
-  if(S.back){ pdf.addPage('a4','portrait'); place(await shootTrim($('cardBack'))); }
+  if(S.back){ pdf.addPage('a4',ausricht); place(await shootTrim($('cardBack'))); }
   pdf.save('visitenkarten-a4-bogen.pdf');
   toast(`A4-Bogen gespeichert – ${n} Karten, ${g} mm Abstand`);
 };
