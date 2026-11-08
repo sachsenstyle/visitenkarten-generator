@@ -119,7 +119,7 @@
   <h1>Visitenkarten-Generator</h1>
   <span>5 Stile &middot; 10 Varianten &middot; Vorder- &amp; Rückseite &middot; Druck-PDF 85&times;55&nbsp;mm</span>
   <span style="margin-left:auto;background:#223049;color:#9dc0ff;padding:3px 10px;
-    border-radius:20px;font-size:11px">Fassung 17 &middot; l&auml;uft offline</span>
+    border-radius:20px;font-size:11px">Fassung 18 &middot; Feinschliff</span>
 </header>
 
 <div class="wrap">
@@ -1038,11 +1038,11 @@ function imgInfo(){
   $('c_imgsizeV').textContent = S.imgsize+' %';
   const v=S.variant; let t;
   if(v==='split')
-    t='Bei Split-Bild füllt das Bild die halbe Karte aus – die Größe ergibt sich daraus, der Regler wirkt hier nicht.';
+    t='Bei Split-Bild füllt das Bild die halbe Karte aus – die Größe ergibt sich daraus. Für ein zusätzliches, frei platziertes Logo nimm das Häkchen unten.';
   else if(!LOGO_BASE[v])
-    t='Diese Variante zeigt auf der Vorderseite kein Logo. Verwende Seitenleiste, Portraitfoto, Logo oben, Vollfarbe, QR-Fokus oder Branding-Band.';
+    t='Diese Variante hat keinen festen Logo-Platz. Setz unten das Häkchen „Logo frei platzieren“ – damit geht es auch hier.';
   else if(v==='qrfocus' && qrAktiv())
-    t='Bei QR-Fokus sitzt an der Logo-Stelle der QR-Code. Schalte den QR-Code aus, damit dort das Logo erscheint.';
+    t='Bei QR-Fokus sitzt an der Logo-Stelle der QR-Code. Schalte ihn aus, oder platziere das Logo mit dem Häkchen unten frei.';
   else
     t=`${imgPx(v)} px auf der Karte. Nach oben begrenzt der Platz in dieser Variante bei ${LOGO_BASE[v].max} px.`;
   $('imgInfo').textContent=t;
@@ -1085,13 +1085,23 @@ function qrPayload(d){
     case 'web':   return d.web ? (/^https?:/i.test(d.web)?d.web:'https://'+d.web) : '';
     case 'mail':  return d.mail ? 'mailto:'+d.mail : '';
     case 'tel':   return d.tel||d.mobil ? 'tel:'+(d.tel||d.mobil).replace(/\s/g,'') : '';
-    case 'vcard': return ['BEGIN:VCARD','VERSION:3.0',
-        'N:'+d.nachname+';'+d.vorname+';;;','FN:'+d.vorname+' '+d.nachname,
-        d.firma?'ORG:'+d.firma:'', d.titel?'TITLE:'+d.titel:'',
-        d.tel?'TEL;TYPE=WORK,VOICE:'+d.tel:'', d.mobil?'TEL;TYPE=CELL:'+d.mobil:'',
+    case 'vcard': {
+      /* CHARSET=UTF-8 an allen Textfeldern – ohne das machen manche Scanner
+         aus „Straße“ und „Müller“ Kauderwelsch. */
+      const U = hatUmlaute => hatUmlaute ? ';CHARSET=UTF-8' : '';
+      const uml = t => /[^\x00-\x7F]/.test(String(t||''));
+      return ['BEGIN:VCARD','VERSION:3.0',
+        'N'+U(uml(d.nachname+d.vorname))+':'+d.nachname+';'+d.vorname+';;;',
+        'FN'+U(uml(d.vorname+d.nachname))+':'+d.vorname+' '+d.nachname,
+        d.firma?'ORG'+U(uml(d.firma))+':'+d.firma:'',
+        d.titel?'TITLE'+U(uml(d.titel))+':'+d.titel:'',
+        d.tel?'TEL;TYPE=WORK,VOICE:'+d.tel:'',
+        d.mobil?'TEL;TYPE=CELL:'+d.mobil:'',
         d.mail?'EMAIL;TYPE=INTERNET:'+d.mail:'',
-        (d.strasse||d.ort)?'ADR;TYPE=WORK:;;'+d.strasse+';'+d.ort+';;'+d.plz+';':'',
+        (d.strasse||d.ort)?'ADR;TYPE=WORK'+U(uml(d.strasse+d.ort))+':;;'
+          +d.strasse+';'+d.ort+';;'+d.plz+';':'',
         d.web?'URL:'+d.web:'','END:VCARD'].filter(Boolean).join('\n');
+    }
   }
   return '';
 }
@@ -1665,8 +1675,17 @@ $('randomize').onclick = ()=>{
 };
 
 $('saveTpl').onclick = ()=>{
-  try{ localStorage.setItem('vk_data', JSON.stringify({d:data(),s:S}));
-       toast('Gespeichert'); }catch(e){ toast('Speichern nicht möglich'); }
+  try{
+    localStorage.setItem('vk_data', JSON.stringify({d:data(),s:S}));
+    toast('Gespeichert'); return;
+  }catch(e){}
+  /* Meist ist das Logo zu groß für den Browserspeicher – dann wenigstens den Rest retten */
+  try{
+    localStorage.setItem('vk_data', JSON.stringify({d:data(), s:{...S, img:null}}));
+    toast('Gespeichert – ohne das Logo, dafür reichte der Browserspeicher nicht');
+  }catch(e){
+    toast('Speichern nicht möglich – Browserspeicher voll oder vom Browser gesperrt');
+  }
 };
 $('loadTpl').onclick = ()=>{
   try{
@@ -1766,10 +1785,6 @@ async function shoot(el){
   el.classList.remove('exporting');
   await compositeQRs(cv, qrs);
   return cv.toDataURL('image/png');
-}
-/* Kontrolle: enthält die Aufnahme überhaupt etwas außer Weiß an der QR-Stelle? */
-function qrVorhanden(el){
-  return !S.qrOn || !!el.querySelector('.qrbox img');
 }
 /* Der QR wandert als echte Rechtecke ins PDF – kein Bild, keine Bildbibliothek.
    Waagerecht zusammenhängende Module werden zu einem Balken verschmolzen,
@@ -2024,6 +2039,12 @@ IMP_FELDER.forEach(k=>{
   e.addEventListener('input', ()=>{ IMPRESSUM[k]=e.value; impSichern(); impStatus(); });
 });
 $('impSpeichern').onclick = ()=>{
+  const fehlt = impOffen();
+  if(fehlt.length && !confirm(
+      'Im Impressum fehlen noch: ' + fehlt.map(k=>IMP_LABEL[k]).join(', ') + '.\n\n'
+      + 'Für die private Nutzung ist das in Ordnung. Sobald die Seite geschäftlich '
+      + 'erreichbar ist, braucht sie ein vollständiges Impressum.\n\n'
+      + 'Datei trotzdem speichern?')) return;
   const inhalt = impDateiBauen();
   if(!inhalt){ toast('Die Datei konnte nicht erzeugt werden.'); return; }
   const blob = new Blob([inhalt], {type:'text/html;charset=utf-8'});
@@ -2031,7 +2052,7 @@ $('impSpeichern').onclick = ()=>{
   a.href = URL.createObjectURL(blob);
   a.download = 'visitenkarten-generator.html';
   a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(e){} }, 4000);
   toast(impOffen().length
     ? 'Datei gespeichert – Impressum ist aber noch unvollständig'
     : 'Datei mit deinen Angaben gespeichert');
