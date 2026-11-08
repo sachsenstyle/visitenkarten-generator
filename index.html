@@ -66,6 +66,7 @@
     border:1px solid var(--ui-line);padding:10px 18px;border-radius:9px;font-size:13px;
     opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
   #toast.on{opacity:1}
+  .hide{display:none}
 
   /* ============ KARTE ============ */
   /* 91 x 61 mm inkl. 3mm Beschnitt @ 5px/mm  =>  455 x 305 px */
@@ -97,6 +98,8 @@
 <header>
   <h1>Visitenkarten-Generator</h1>
   <span>5 Stile &middot; 10 Varianten &middot; Vorder- &amp; Rückseite &middot; Druck-PDF 85&times;55&nbsp;mm</span>
+  <span style="margin-left:auto;background:#223049;color:#9dc0ff;padding:3px 10px;
+    border-radius:20px;font-size:11px">Fassung 10 &middot; QR nur auf Wunsch</span>
 </header>
 
 <div class="wrap">
@@ -140,7 +143,7 @@
     <label>Akzentfarbe</label>
     <div class="cc"><input type="color" id="c_acc"><small id="c_acc_t"></small></div>
     <div class="sw" id="swAcc"></div>
-    <label>Hintergrund</label>
+    <label>Hintergrund (Vorderseite)</label>
     <div class="cc"><input type="color" id="c_bg"><small id="c_bg_t"></small></div>
     <div class="sw" id="swBg"></div>
     <label>Textfarbe</label>
@@ -156,26 +159,56 @@
     <legend>4 &middot; Logo / Foto</legend>
     <input type="file" id="up" accept="image/*">
     <div id="fileName">Kein Bild geladen</div>
-    <label>Bildgröße</label>
-    <input type="range" id="c_imgsize" min="40" max="150" value="80" style="width:100%">
+    <label>Bildgröße auf der Vorderseite</label>
+    <div class="sl"><input type="range" id="c_imgsize" min="50" max="160" value="100"><b id="c_imgsizeV">100 %</b></div>
+    <div class="hint" id="imgInfo"></div>
     <button class="act sec" id="clearImg" style="margin-top:8px">Bild entfernen</button>
   </fieldset>
 
   <fieldset>
     <legend>5 &middot; QR-Code</legend>
-    <select id="c_qr">
-      <option value="off">Kein QR-Code</option>
-      <option value="web" selected>Webseite</option>
-      <option value="vcard">vCard (alle Kontaktdaten)</option>
-      <option value="mail">E-Mail</option>
-      <option value="tel">Telefon</option>
-    </select>
-    <div class="hint">Die vCard speichert Name, Firma, Adresse, Telefon, Mobil, E-Mail und Web beim Scannen direkt ins Adressbuch.</div>
-    <label class="chk"><input type="checkbox" id="c_qrlab"> Text unter dem QR-Code anzeigen</label>
-    <input type="text" id="c_qrtext" value="Scannen &amp; speichern" style="margin-top:6px">
-    <label>Weißer Rand um den QR-Code</label>
-    <div class="sl"><input type="range" id="c_qrpad" min="3" max="14" value="5"><b id="c_qrpadV">5</b></div>
-    <div class="hint">Scanner brauchen rundum freie Fläche. Zu wenig Rand ist der häufigste Grund, warum ein gedruckter QR-Code nicht erkannt wird.</div>
+    <label class="chk" style="font-size:14px;font-weight:600;margin-top:2px">
+      <input type="checkbox" id="qr_on"> QR-Code auf der Karte verwenden</label>
+    <div class="hint" id="qrAus">Aus. Keine Variante zeigt einen QR-Code, bis du ihn hier einschaltest.</div>
+
+    <div id="qrBox" class="hide">
+      <label>Inhalt</label>
+      <select id="c_qr">
+        <option value="web" selected>Webseite</option>
+        <option value="vcard">vCard (alle Kontaktdaten)</option>
+        <option value="mail">E-Mail</option>
+        <option value="tel">Telefon</option>
+      </select>
+      <div class="hint">Die vCard speichert Name, Firma, Adresse, Telefon, Mobil, E-Mail und Web beim Scannen direkt ins Adressbuch.</div>
+
+      <label>Platzierung</label>
+      <select id="qr_place">
+        <option value="variant" selected>an der vorgesehenen Stelle der Variante</option>
+        <option value="free">frei platzieren – mit Maus oder Reglern</option>
+      </select>
+
+      <div id="fqBox" class="hide">
+        <div class="hint">Zieh den Code in der Vorschau einfach mit der Maus dorthin, wo du ihn haben willst.</div>
+        <label>auf welcher Seite</label>
+        <select id="fq_side">
+          <option value="front">Vorderseite</option>
+          <option value="back">Rückseite</option>
+        </select>
+        <label>Größe</label>
+        <div class="sl"><input type="range" id="fq_size" min="8" max="45" value="20"><b id="fq_sizeV">20 mm</b></div>
+        <label>waagerecht</label>
+        <div class="sl"><input type="range" id="fq_x" min="0" max="100" value="78"><b id="fq_xV">78 %</b></div>
+        <label>senkrecht</label>
+        <div class="sl"><input type="range" id="fq_y" min="0" max="100" value="68"><b id="fq_yV">68 %</b></div>
+      </div>
+
+      <label class="chk"><input type="checkbox" id="c_qrlab"> Text unter dem QR-Code anzeigen</label>
+      <input type="text" id="c_qrtext" value="Scannen &amp; speichern" style="margin-top:6px">
+      <label>Weißer Rand um den QR-Code</label>
+      <div class="sl"><input type="range" id="c_qrpad" min="3" max="14" value="5"><b id="c_qrpadV">5</b></div>
+      <div class="hint">Scanner brauchen rundum freie Fläche. Zu wenig Rand ist der häufigste Grund, warum ein gedruckter QR-Code nicht erkannt wird.</div>
+      <div id="qrWarn"></div>
+    </div>
   </fieldset>
 
   <fieldset>
@@ -189,10 +222,22 @@
       <option value="contact">Kontaktdaten komplett</option>
       <option value="plain">Nur Farbfläche</option>
     </select>
+
+    <label>Hintergrund der Rückseite</label>
+    <select id="c_backbg">
+      <option value="acc">Akzentfarbe</option>
+      <option value="bg" selected>wie Vorderseite</option>
+      <option value="custom">eigene Farbe</option>
+    </select>
+    <div class="cc hide" id="backbgWrap">
+      <input type="color" id="c_backbgc"><small id="c_backbgc_t"></small>
+    </div>
+    <div class="hint" id="backbgInfo"></div>
+
     <label class="chk"><input type="checkbox" id="c_backname" checked> Firmenname unter dem Logo anzeigen</label>
     <div class="hint">Abschalten, wenn der Name schon in deiner Logo-Datei steht – sonst steht er zweimal da.</div>
     <label>Logo-Größe auf der Rückseite</label>
-    <div class="sl"><input type="range" id="c_backsize" min="70" max="300" value="130"><b id="c_backsizeV">130</b></div>
+    <div class="sl"><input type="range" id="c_backsize" min="70" max="300" value="150"><b id="c_backsizeV">150</b></div>
   </fieldset>
 
   <fieldset>
@@ -262,6 +307,8 @@ const STYLES = {
                  h:'Kräftig, kontrastreich, dynamisch – Fitness, Events, Startup.'},
   elegant:      {n:'Elegant',      acc:'#c2a15c', bg:'#14100e', ink:'#f4efe6', font:'eleg',
                  h:'Dunkel mit Gold – Luxus, Kunst, Gastronomie, Hochzeit.'},
+  zwerg:        {n:'Waldgrün',     acc:'#3b8a5e', bg:'#16211b', ink:'#f1f4f0', font:'serif',
+                 h:'Dunkles Waldgrün mit hellem Akzent – Buch, Natur, Handwerk.'},
   alltaeglich:  {n:'Alltäglich',   acc:'#2a9d8f', bg:'#fbfaf7', ink:'#22282e', font:'geo',
                  h:'Freundlich und warm – Handwerk, Praxis, Kreative, privat.'}
 };
@@ -279,18 +326,21 @@ const VARIANTS = [
   {id:'frame',    n:'10 Rahmen',       d:'Feine Outline, Monogramm'}
 ];
 
-const SWATCH_ACC = ['#0f4c81','#1c2b45','#e63946','#c2a15c','#2a9d8f','#7b2cbf','#ff7b00','#111111','#0a8754','#d90429'];
-const SWATCH_BG  = ['#ffffff','#fbfaf7','#f2f0eb','#eef2f6','#101317','#14100e','#1b2430','#2b2118','#0d1f1c','#f7e9dd'];
+const SWATCH_ACC = ['#3b8a5e','#0f4c81','#1c2b45','#e63946','#c2a15c','#2a9d8f','#7b2cbf','#ff7b00','#111111','#d90429'];
+const SWATCH_BG  = ['#16211b','#ffffff','#fbfaf7','#f2f0eb','#eef2f6','#101317','#14100e','#1b2430','#0d1f1c','#f7e9dd'];
 
 /* ============================================================
    STATE
    ============================================================ */
 const S = {
-  style:'professionell', variant:'sidebar',
-  acc:'#0f4c81', bg:'#ffffff', ink:'#171c26', font:'sans',
-  size:22, img:null, imgsize:80, qr:'web',
+  style:'zwerg', variant:'qrfocus',
+  acc:'#3b8a5e', bg:'#16211b', ink:'#f1f4f0', font:'serif',
+  size:22, img:null, imgsize:100,
+  qrOn:false, qr:'web', qrPlace:'variant',     // aus, bis der Nutzer ihn einschaltet
   qrlab:false, qrtext:'Scannen & speichern', qrpad:5,
-  back:true, backstyle:'logo', backname:true, backsize:130, trim:true,
+  freeQR:{side:'front', x:0.78, y:0.68, size:20},
+  back:true, backstyle:'logo', backbg:'bg', backbgc:'#16211b',
+  backname:true, backsize:150, trim:true,
   gutter:5, cutmode:'marks'
 };
 
@@ -312,7 +362,6 @@ function isDark(hex){
   const c=hex.replace('#',''); const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);
   return (0.299*r+0.587*g+0.114*b) < 140;
 }
-/* WCAG-Kontrastverhältnis: 1 = unsichtbar, 21 = Schwarz auf Weiß */
 function relLum(hex){
   const c=hex.replace('#','');
   const v=[0,2,4].map(i=>{
@@ -325,7 +374,6 @@ function contrast(a,b){
   const l1=relLum(a),l2=relLum(b);
   return (Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05);
 }
-/* Verhindert, dass Text und Hintergrund gleich hell werden */
 function guardContrast(changed){
   if(changed==='bg' && contrast(S.ink,S.bg)<3)
     S.ink = isDark(S.bg) ? '#f4f6fa' : '#171c26';
@@ -348,10 +396,62 @@ function mix(hex,pct){
   return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
 }
 
+/* Logo-Größe je Variante: Grundmaß und was der Platz hergibt.
+   Der Regler arbeitet in Prozent davon, sonst läuft er gegen die Deckelung ins Leere. */
+const LOGO_BASE = {
+  sidebar:{b:68,max:100}, photo:{b:96,max:150}, logotop:{b:58,max:92},
+  fullcolor:{b:54,max:86}, qrfocus:{b:86,max:118}, band:{b:50,max:58}
+};
+function imgPx(v){
+  const L=LOGO_BASE[v]; if(!L) return 0;
+  return Math.max(24, Math.min(Math.round(L.b*S.imgsize/100), L.max));
+}
+function imgInfo(){
+  $('c_imgsizeV').textContent = S.imgsize+' %';
+  const v=S.variant; let t;
+  if(v==='split')
+    t='Bei Split-Bild füllt das Bild die halbe Karte aus – die Größe ergibt sich daraus, der Regler wirkt hier nicht.';
+  else if(!LOGO_BASE[v])
+    t='Diese Variante zeigt auf der Vorderseite kein Logo. Verwende Seitenleiste, Portraitfoto, Logo oben, Vollfarbe, QR-Fokus oder Branding-Band.';
+  else if(v==='qrfocus' && qrAktiv())
+    t='Bei QR-Fokus sitzt an der Logo-Stelle der QR-Code. Schalte den QR-Code aus, damit dort das Logo erscheint.';
+  else
+    t=`${imgPx(v)} px auf der Karte. Nach oben begrenzt der Platz in dieser Variante bei ${LOGO_BASE[v].max} px.`;
+  $('imgInfo').textContent=t;
+}
+
+/* Fläche der Rückseite – frei wählbar, unabhängig von der Akzentfarbe */
+function backFlaeche(){
+  if(S.backbg==='acc')    return S.acc;
+  if(S.backbg==='custom') return S.backbgc;
+  return S.bg;
+}
+
 /* ============================================================
    QR
    ============================================================ */
 let qrCache = {key:null,url:null};
+let qrModell = {key:null,model:null};
+let qrFehler = null;
+
+/* Genau eine Quelle der Wahrheit: zeigt die Variante selbst einen QR-Code? */
+function qrAktiv(){ return S.qrOn && S.qrPlace==='variant'; }
+function qrFrei(){  return S.qrOn && S.qrPlace==='free'; }
+
+/* Den QR aus dem Rastermodell in ein eigenes Canvas malen – Notnagel und Vorschauquelle */
+function qrAusModell(model,size){
+  try{
+    const n=model.getModuleCount();
+    const cell=Math.max(1,Math.floor(size/n)), s=cell*n;
+    const cv=document.createElement('canvas'); cv.width=cv.height=s;
+    const ctx=cv.getContext('2d'); if(!ctx) return '';
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,s,s);
+    ctx.fillStyle='#000000';
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++)
+      if(model.isDark(r,c)) ctx.fillRect(c*cell,r*cell,cell,cell);
+    return cv.toDataURL('image/png');
+  }catch(e){ return ''; }
+}
 function qrPayload(d){
   switch(S.qr){
     case 'web':   return d.web ? (/^https?:/i.test(d.web)?d.web:'https://'+d.web) : '';
@@ -368,17 +468,43 @@ function qrPayload(d){
   return '';
 }
 function qrDataURL(d){
-  if(S.qr==='off') return null;
-  const txt = qrPayload(d); if(!txt) return null;
-  if(qrCache.key===txt) return qrCache.url;
+  qrFehler = null;
+  if(!S.qrOn) return null;
+  const txt = qrPayload(d);
+  if(!txt){ qrFehler='Für die gewählte QR-Art fehlen die Daten – trage Webseite, E-Mail oder Telefon ein.'; return null; }
+  if(qrCache.key===txt && qrCache.url) return qrCache.url;
   const h = $('qrHolder'); h.innerHTML='';
   try{
-    new QRCode(h,{text:txt,width:320,height:320,colorDark:'#000000',colorLight:'#ffffff',
+    if(typeof QRCode==='undefined')
+      throw new Error('Die QR-Bibliothek ist nicht geladen. Öffne die Datei einmal mit Internetverbindung.');
+    const q = new QRCode(h,{text:txt,width:512,height:512,colorDark:'#000000',colorLight:'#ffffff',
       correctLevel:QRCode.CorrectLevel.M});
+    /* Das Rastermodell merken. Damit lässt sich der Code beim Export selbst
+       zeichnen, ohne auf ein Bild angewiesen zu sein. */
+    const m = q && q._oQRCode;
+    qrModell = (m && typeof m.getModuleCount==='function' && typeof m.isDark==='function')
+      ? {key:txt, model:m} : {key:null, model:null};
     const cv = h.querySelector('canvas');
-    const url = cv ? cv.toDataURL('image/png') : (h.querySelector('img')||{}).src;
-    qrCache = {key:txt,url}; return url;
-  }catch(e){ return null; }
+    const url = cv ? cv.toDataURL('image/png') : ((h.querySelector('img')||{}).src || '');
+    if(!url || url.length<200){
+      if(qrModell.model) { qrCache={key:txt,url:qrAusModell(qrModell.model,512)}; return qrCache.url; }
+      throw new Error('Der QR-Code konnte nicht erzeugt werden.');
+    }
+    qrCache = {key:txt,url};
+    return url;
+  }catch(e){
+    qrFehler = e.message;
+    qrCache = {key:null,url:null};
+    return null;
+  }
+}
+function qrInfo(){
+  const el=$('qrWarn'); if(!el) return;
+  el.innerHTML = qrFehler
+    ? `<div style="background:rgba(255,92,108,.12);border:1px solid rgba(255,92,108,.4);color:#ffb3ba;
+        border-radius:7px;padding:8px 10px;font-size:11.5px;line-height:1.5;margin-top:8px">${qrFehler}</div>`
+    : (!S.qrOn ? '' :
+       `<div style="font-size:11px;color:#7fd6a8;margin-top:8px">QR-Code erzeugt und einsatzbereit.</div>`);
 }
 
 /* ============================================================
@@ -402,11 +528,26 @@ function bContact(d,al='left',showAll=true){
   return `<div class="ct" style="text-align:${al}">${L.join('')}</div>`;
 }
 function bQR(d,px=58){
+  const u = qrDataURL(d);
+  if(!u) return '';                      // lieber nichts als ein weißer Fleck
+  return `<div class="qrbox" style="padding:${S.qrpad}px"><img src="${u}" width="${px}" height="${px}"
+    style="width:${px}px;height:${px}px"></div>`;
+}
+/* Frei platzierter QR. Position zählt ab der Schnittkante, damit sie in
+   Vorschau, Einzelkarte und Druckbogen an derselben Stelle sitzt. */
+function bFreeQR(d,seite){
+  const F=S.freeQR;
+  if(!qrFrei() || F.side!==seite) return '';
   const u = qrDataURL(d); if(!u) return '';
-  return `<div class="qrbox" style="padding:${S.qrpad}px"><img src="${u}" style="width:${px}px;height:${px}px"></div>`;
+  const qpx = Math.round(F.size*5);              // 5 px je Millimeter
+  const box = qpx + 2*S.qrpad;
+  const pos = a => `calc(var(--bleed) + ${a} * (100% - 2*var(--bleed) - ${box}px))`;
+  return `<div class="qrbox freeqr" data-frei="1" style="position:absolute;
+    left:${pos(F.x)};top:${pos(F.y)};padding:${S.qrpad}px;z-index:60;cursor:grab">
+    <img src="${u}" width="${qpx}" height="${qpx}" style="width:${qpx}px;height:${qpx}px"></div>`;
 }
 function bQRLabel(col){
-  if(!S.qrlab || S.qr==='off' || !S.qrtext.trim()) return '';
+  if(!S.qrlab || !S.qrOn || !S.qrtext.trim()) return '';
   return `<div style="font-size:8px;letter-spacing:.15em;text-transform:uppercase;
     text-align:center;color:${col}">${esc(S.qrtext)}</div>`;
 }
@@ -428,14 +569,14 @@ minimal(d){ return `<div class="safe" style="flex-direction:column;align-items:c
     ${bName(d,'center')}
     <div class="rule" style="width:44px;margin:14px 0"></div>
     ${bContact(d,'center')}
-    ${S.qr!=='off'?`<div style="margin-top:11px">${bQR(d,46)}</div>`:''}
+    ${qrAktiv()?`<div style="margin-top:11px">${bQR(d,46)}</div>`:''}
   </div>`;},
 
 sidebar(d){ return `
   <div style="position:absolute;left:0;top:0;bottom:0;width:calc(var(--bleed) + 108px);background:var(--acc)"></div>
   <div style="position:absolute;left:var(--bleed);top:var(--bleed);bottom:var(--bleed);width:108px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#fff">
-    ${bImg(d,Math.min(S.imgsize,76),false)}
+    ${bImg(d,imgPx('sidebar'),false)}
     ${d.firma?`<div style="font-size:9.4px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
       text-align:center;color:${isDark(S.acc)?'#ffffff':'#101317'};padding:0 8px;line-height:1.4">${esc(d.firma)}</div>`:''}
   </div>
@@ -444,30 +585,30 @@ sidebar(d){ return `
     <div class="rule" style="width:34px"></div>
     ${bContact(d)}
   </div>
-  ${S.qr!=='off'?`<div style="position:absolute;right:var(--bleed);bottom:var(--bleed)">${bQR(d,48)}</div>`:''}`;},
+  ${qrAktiv()?`<div style="position:absolute;right:var(--bleed);bottom:var(--bleed)">${bQR(d,48)}</div>`:''}`;},
 
 photo(d){ return `<div class="safe" style="align-items:center;gap:18px">
-    <div style="flex:0 0 auto">${bImg(d,Math.min(S.imgsize+20,118),true)}</div>
+    <div style="flex:0 0 auto">${bImg(d,imgPx('photo'),true)}</div>
     <div style="flex:1;display:flex;flex-direction:column;gap:9px;min-width:0">
       ${bFirma(d)}
       ${bName(d)}
       <div class="rule" style="width:30px"></div>
       ${bContact(d)}
     </div>
-    ${S.qr!=='off'?`<div style="flex:0 0 auto;align-self:flex-end">${bQR(d,50)}</div>`:''}
+    ${qrAktiv()?`<div style="flex:0 0 auto;align-self:flex-end">${bQR(d,50)}</div>`:''}
   </div>`;},
 
 logotop(d){ return `
   <div style="position:absolute;left:0;right:0;top:0;height:calc(var(--bleed) + 6px);background:var(--acc)"></div>
   <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:8px;padding-top:8px">
-    ${bImg(d,Math.min(S.imgsize,64),false)}
+    ${bImg(d,imgPx('logotop'),false)}
     ${bFirma(d,'center')}
     <div style="height:2px"></div>
     ${bName(d,'center')}
     <div style="width:100%;height:1px;background:var(--acc);opacity:.35;margin:8px 0 2px"></div>
     <div style="display:flex;align-items:center;gap:14px;width:100%;justify-content:center">
       ${bContact(d,'center')}
-      ${S.qr!=='off'?bQR(d,44):''}
+      ${qrAktiv()?bQR(d,44):''}
     </div>
   </div>`;},
 
@@ -484,7 +625,7 @@ fullcolor(d){
         <div class="nm" style="color:${fg}">${esc(d.vorname)} ${esc(d.nachname)}
           ${d.titel?`<small style="color:${fg};opacity:.8">${esc(d.titel)}</small>`:''}</div>
       </div>
-      ${S.img?`<img src="${S.img}" style="width:${Math.min(S.imgsize,58)}px;height:${Math.min(S.imgsize,58)}px;object-fit:contain">`:''}
+      ${S.img?`<img src="${S.img}" style="width:${imgPx('fullcolor')}px;height:${imgPx('fullcolor')}px;object-fit:contain">`:''}
     </div>
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
       <div class="ct" style="color:${fg};opacity:.92">
@@ -495,7 +636,7 @@ fullcolor(d){
         ${d.mail?`<div>${esc(d.mail)}</div>`:''}
         ${d.web?`<div>${esc(d.web)}</div>`:''}
       </div>
-      ${S.qr!=='off'?bQR(d,52):''}
+      ${qrAktiv()?bQR(d,52):''}
     </div>
   </div>`;},
 
@@ -514,7 +655,7 @@ diagonal(d){
     </div>
     <div style="display:flex;justify-content:flex-end;align-items:flex-end;gap:12px">
       ${bContact(d,'right')}
-      ${S.qr!=='off'?bQR(d,50):''}
+      ${qrAktiv()?bQR(d,50):''}
     </div>
   </div>`;},
 
@@ -522,7 +663,7 @@ qrfocus(d){ return `
   <div style="position:absolute;right:0;top:0;bottom:0;width:calc(var(--bleed) + 128px);background:var(--acc)"></div>
   <div style="position:absolute;right:var(--bleed);top:var(--bleed);bottom:var(--bleed);width:128px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px">
-    ${S.qr!=='off'?bQR(d,86):bImg(d,86,false)}
+    ${qrAktiv()?bQR(d,86):bImg(d,imgPx('qrfocus'),false)}
     ${bQRLabel(isDark(S.acc)?'#ffffff':'#101317')}
   </div>
   <div class="safe" style="right:calc(var(--bleed) + 144px);flex-direction:column;justify-content:center;gap:11px">
@@ -542,14 +683,14 @@ band(d){
   </div>
   <div style="position:absolute;left:var(--bleed);right:var(--bleed);bottom:var(--bleed);height:60px;
     display:flex;align-items:center;justify-content:space-between;gap:12px;color:${fg}">
-    ${bImg(d,52,false)}
+    ${bImg(d,imgPx('band'),false)}
     <div class="ct" style="color:${fg};text-align:right;flex:1">
       ${d.strasse?`<div>${esc(d.strasse)}, ${esc(d.plz)} ${esc(d.ort)}</div>`:''}
       ${d.tel?`<div>T ${esc(d.tel)}${d.mobil?' &nbsp;·&nbsp; M '+esc(d.mobil):''}</div>`:''}
       ${d.mail?`<div>${esc(d.mail)}</div>`:''}
       ${d.web?`<div>${esc(d.web)}</div>`:''}
     </div>
-    ${S.qr!=='off'?bQR(d,50):''}
+    ${qrAktiv()?bQR(d,50):''}
   </div>`;},
 
 split(d){
@@ -572,7 +713,7 @@ split(d){
     ${bName(d)}
     <div class="rule" style="width:28px"></div>
     ${bContact(d)}
-    ${S.qr!=='off'?`<div style="margin-top:4px">${bQR(d,44)}</div>`:''}
+    ${qrAktiv()?`<div style="margin-top:4px">${bQR(d,44)}</div>`:''}
   </div>`;},
 
 frame(d){ return `
@@ -592,28 +733,31 @@ frame(d){ return `
     </div>
     ${bContact(d,'center')}
   </div>
-  ${S.qr!=='off'?`<div style="position:absolute;right:calc(var(--bleed) + 14px);bottom:calc(var(--bleed) + 14px)">${bQR(d,40)}</div>`:''}`;}
+  ${qrAktiv()?`<div style="position:absolute;right:calc(var(--bleed) + 14px);bottom:calc(var(--bleed) + 14px)">${bQR(d,40)}</div>`:''}`;}
 };
 
 /* ============================================================
    RÜCKSEITE
+   Die Fläche kommt aus backFlaeche(), nicht mehr zwingend aus der Akzentfarbe.
    ============================================================ */
-function backLogo(d){
+function backLogo(d,fg){
   const s = S.backsize;
   if(S.img) return `<img src="${S.img}" style="max-width:${s}px;max-height:${Math.round(s*0.78)}px;
     width:auto;height:auto;object-fit:contain">`;
-  return `<div style="font-size:${Math.round(s*0.42)}px;font-weight:700;letter-spacing:.08em">${esc(initials(d))}</div>`;
+  return `<div style="font-size:${Math.round(s*0.42)}px;font-weight:700;letter-spacing:.08em;color:${fg}">${esc(initials(d))}</div>`;
 }
 function renderBack(d){
-  const fg = isDark(S.acc)?'#ffffff':'#101317';
+  const fl = backFlaeche();
+  const fg = isDark(fl) ? '#ffffff' : '#101317';
+  const schleier = isDark(fl) ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.07)';
   switch(S.backstyle){
-    case 'logo': return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
+    case 'logo': return `
       <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:14px;color:${fg}">
-        ${backLogo(d)}
+        ${backLogo(d,fg)}
         ${(S.backname && d.firma)?`<div style="font-size:10.5px;font-weight:700;letter-spacing:.24em;
           text-transform:uppercase;color:${fg};opacity:.9">${esc(d.firma)}</div>`:''}
       </div>`;
-    case 'slogan': return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
+    case 'slogan': return `
       <div class="safe" style="flex-direction:column;align-items:center;justify-content:center;
         text-align:center;padding:0 42px;gap:16px;color:${fg}">
         <div style="font-size:19px;line-height:1.4;font-weight:600">${esc(d.slogan||d.firma)}</div>
@@ -621,12 +765,12 @@ function renderBack(d){
         ${d.web?`<div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.9">${esc(d.web)}</div>`:''}
       </div>`;
     case 'qr': return `<div class="safe" style="flex-direction:column;align-items:center;justify-content:center;gap:12px">
-        ${S.qr!=='off'?bQR(d,140):bImg(d,120,false)}
-        ${bQRLabel('var(--soft)')}
+        ${qrAktiv()?bQR(d,140):backLogo(d,fg)}
+        ${bQRLabel(fg)}
       </div>`;
     case 'contact': return `
       <div style="position:absolute;left:0;right:0;top:0;height:calc(var(--bleed) + 5px);background:var(--acc)"></div>
-      <div class="safe" style="flex-direction:column;justify-content:center;gap:9px;padding-left:6px">
+      <div class="safe" style="flex-direction:column;justify-content:center;gap:9px;padding-left:6px;color:${fg}">
         ${bFirma(d)}
         <div class="ct" style="font-size:10.5px;line-height:1.9">
           ${d.strasse?`<div><b>Adr</b> ${esc(d.strasse)}, ${esc(d.plz)} ${esc(d.ort)}</div>`:''}
@@ -636,10 +780,10 @@ function renderBack(d){
           ${d.web?`<div><b>Web</b> ${esc(d.web)}</div>`:''}
         </div>
       </div>
-      ${S.qr!=='off'?`<div style="position:absolute;right:calc(var(--bleed) + 4px);bottom:calc(var(--bleed) + 4px)">${bQR(d,60)}</div>`:''}`;
-    default: return `<div style="position:absolute;inset:0;background:var(--acc)"></div>
+      ${qrAktiv()?`<div style="position:absolute;right:calc(var(--bleed) + 4px);bottom:calc(var(--bleed) + 4px)">${bQR(d,60)}</div>`:''}`;
+    default: return `
       <div style="position:absolute;right:-50px;bottom:-70px;width:230px;height:230px;border-radius:50%;
-        background:${isDark(S.acc)?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)'}"></div>`;
+        background:${schleier}"></div>`;
   }
 }
 
@@ -654,22 +798,56 @@ function applyVars(el){
   el.style.setProperty('--ff',FONTS[S.font].v);
   el.style.background = S.bg; el.style.color = S.ink;
 }
+function applyVarsBack(el){
+  applyVars(el);
+  const fl  = backFlaeche();
+  const ink = isDark(fl) ? '#ffffff' : '#101317';
+  el.style.background = fl;
+  el.style.color = ink;
+  el.style.setProperty('--ink', ink);
+  el.style.setProperty('--soft', isDark(fl)?mix(ink,-25):mix(ink,40));
+}
 function render(){
   const d = data();
   const f = $('cardFront');
   applyVars(f);
-  f.innerHTML = (RENDER[S.variant]||RENDER.minimal)(d) + (S.trim?'<div class="trim"></div>':'');
+  f.innerHTML = (RENDER[S.variant]||RENDER.minimal)(d) + bFreeQR(d,'front')
+              + (S.trim?'<div class="trim"></div>':'');
   f.querySelectorAll('.nm').forEach(n=>n.style.fontSize=S.size+'px');
 
   $('backStage').style.display = S.back?'flex':'none';
   if(S.back){
-    const b = $('cardBack'); applyVars(b);
-    b.innerHTML = renderBack(d) + (S.trim?'<div class="trim"></div>':'');
+    const b = $('cardBack'); applyVarsBack(b);
+    b.innerHTML = renderBack(d) + bFreeQR(d,'back')
+                + (S.trim?'<div class="trim"></div>':'');
   }
+  qrInfo();
 }
 
+/* Ziehen mit der Maus */
+function dragStart(ev){
+  const box = ev.target.closest('.freeqr'); if(!box) return;
+  const card = box.closest('.card'); if(!card) return;
+  ev.preventDefault();
+  const cr = card.getBoundingClientRect(), br = box.getBoundingClientRect();
+  const bleed = 15 * (cr.width/455);
+  const greifX = ev.clientX - br.left, greifY = ev.clientY - br.top;
+  const frei = { w: cr.width - 2*bleed - br.width, h: cr.height - 2*bleed - br.height };
+  box.style.cursor='grabbing';
+  const move = e=>{
+    if(frei.w>0) S.freeQR.x = Math.min(1,Math.max(0,(e.clientX-cr.left-bleed-greifX)/frei.w));
+    if(frei.h>0) S.freeQR.y = Math.min(1,Math.max(0,(e.clientY-cr.top -bleed-greifY)/frei.h));
+    syncControls(); render();
+  };
+  const up = ()=>{ document.removeEventListener('mousemove',move);
+                   document.removeEventListener('mouseup',up); };
+  document.addEventListener('mousemove',move);
+  document.addEventListener('mouseup',up);
+}
+document.addEventListener('mousedown',dragStart);
+
 /* ============================================================
-   A4-BOGEN: Aufteilung berechnen
+   A4-BOGEN
    ============================================================ */
 function sheetLayout(){
   const W=85,H=55,M=5,g=S.gutter;
@@ -690,8 +868,8 @@ function sheetInfo(){
   const L=sheetLayout();
   const fmt=L.quer?'A4 quer':'A4 hoch';
   let t = L.g===0
-    ? `Ohne Abstand: ${L.n} Karten auf ${fmt}. Ein Schnitt bedient zwei Karten – spart Papier, verzeiht aber keinen Versatz. Bei dunklen Karten bleibt schnell ein weißer Streifen stehen.`
-    : `${L.g} mm Abstand: ${L.n} Karten auf ${fmt} (${L.cols} × ${L.rows}). Jede Karte wird einzeln geschnitten, kleine Ungenauigkeiten fallen nicht auf.`;
+    ? `Ohne Abstand: ${L.n} Karten auf ${fmt}. Ein Schnitt bedient zwei Karten – spart Papier, verzeiht aber keinen Versatz.`
+    : `${L.g} mm Abstand: ${L.n} Karten auf ${fmt} (${L.cols} × ${L.rows}). Jede Karte wird einzeln geschnitten.`;
   if(L.g>0 && L.g<3) t+=` Für bequemes Schneiden sind 4 bis 6 mm angenehmer.`;
   $('sheetInfo').textContent=t;
 }
@@ -713,6 +891,11 @@ function applyStyle(k){
   $('styleHint').textContent = st.h;
   syncControls(); render();
 }
+function backbgInfo(){
+  const fl=backFlaeche();
+  const q = S.backbg==='acc' ? 'die Akzentfarbe' : S.backbg==='bg' ? 'die Hintergrundfarbe der Vorderseite' : 'deine eigene Farbe';
+  $('backbgInfo').textContent = `Die Rückseite nimmt ${q}: ${fl}.`;
+}
 function syncControls(){
   document.querySelectorAll('#styleChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===S.style));
   document.querySelectorAll('#varGrid .vbtn').forEach(c=>c.classList.toggle('on',c.dataset.v===S.variant));
@@ -725,9 +908,21 @@ function syncControls(){
   $('c_qrpad').value=S.qrpad; $('c_qrpadV').textContent=S.qrpad;
   $('c_backname').checked=S.backname;
   $('c_backsize').value=S.backsize; $('c_backsizeV').textContent=S.backsize;
+  $('c_backbg').value=S.backbg;
+  $('c_backbgc').value=S.backbgc; $('c_backbgc_t').textContent=S.backbgc;
+  $('backbgWrap').classList.toggle('hide', S.backbg!=='custom');
   $('c_gutter').value=S.gutter; $('c_gutterV').textContent=S.gutter+' mm';
   $('c_cutmode').value=S.cutmode;
-  showContrast(); sheetInfo();
+  const F=S.freeQR;
+  $('qr_on').checked=S.qrOn;
+  $('qrBox').classList.toggle('hide',!S.qrOn);
+  $('qrAus').classList.toggle('hide',S.qrOn);
+  $('qr_place').value=S.qrPlace;
+  $('fqBox').classList.toggle('hide',!qrFrei());
+  $('fq_side').value=F.side; $('fq_size').value=F.size; $('fq_sizeV').textContent=F.size+' mm';
+  $('fq_x').value=Math.round(F.x*100); $('fq_xV').textContent=Math.round(F.x*100)+' %';
+  $('fq_y').value=Math.round(F.y*100); $('fq_yV').textContent=Math.round(F.y*100)+' %';
+  showContrast(); sheetInfo(); backbgInfo(); imgInfo(); qrInfo();
 }
 
 $('styleChips').onclick = e => { const t=e.target.closest('.chip'); if(t) applyStyle(t.dataset.s); };
@@ -743,18 +938,25 @@ $('swBg').onclick  = e => { if(e.target.dataset.t){ S.bg=e.target.title; guardCo
 
 $('c_font').onchange  = e=>{ S.font=e.target.value; render(); };
 $('c_size').oninput   = e=>{ S.size=+e.target.value; render(); };
-$('c_imgsize').oninput= e=>{ S.imgsize=+e.target.value; render(); };
-$('c_qr').onchange    = e=>{ S.qr=e.target.value; render(); };
+$('c_imgsize').oninput= e=>{ S.imgsize=+e.target.value; imgInfo(); render(); };
+$('c_qr').onchange    = e=>{ S.qr=e.target.value; imgInfo(); render(); };
 $('c_back').onchange  = e=>{ S.back=e.target.checked; render(); };
 $('c_backstyle').onchange = e=>{ S.backstyle=e.target.value; render(); };
 $('c_backname').onchange  = e=>{ S.backname=e.target.checked; render(); };
 $('c_backsize').oninput   = e=>{ S.backsize=+e.target.value; $('c_backsizeV').textContent=S.backsize; render(); };
+$('c_backbg').onchange    = e=>{ S.backbg=e.target.value; syncControls(); render(); };
+$('c_backbgc').oninput    = e=>{ S.backbgc=e.target.value; syncControls(); render(); };
 $('c_trim').onchange  = e=>{ S.trim=e.target.checked; render(); };
 $('c_qrlab').onchange = e=>{ S.qrlab=e.target.checked; render(); };
 $('c_qrpad').oninput  = e=>{ S.qrpad=+e.target.value; $('c_qrpadV').textContent=S.qrpad; render(); };
 $('c_gutter').oninput = e=>{ S.gutter=+e.target.value; $('c_gutterV').textContent=S.gutter+' mm'; sheetInfo(); };
 $('c_cutmode').onchange = e=>{ S.cutmode=e.target.value; };
-/* addEventListener, damit der allgemeine Textfeld-Handler weiter unten das nicht überschreibt */
+$('qr_on').onchange    = e=>{ S.qrOn=e.target.checked; syncControls(); render(); };
+$('qr_place').onchange = e=>{ S.qrPlace=e.target.value; syncControls(); render(); };
+$('fq_side').onchange = e=>{ S.freeQR.side=e.target.value; render(); };
+$('fq_size').oninput  = e=>{ S.freeQR.size=+e.target.value; $('fq_sizeV').textContent=S.freeQR.size+' mm'; render(); };
+$('fq_x').oninput     = e=>{ S.freeQR.x=+e.target.value/100; $('fq_xV').textContent=e.target.value+' %'; render(); };
+$('fq_y').oninput     = e=>{ S.freeQR.y=+e.target.value/100; $('fq_yV').textContent=e.target.value+' %'; render(); };
 $('c_qrtext').addEventListener('input', e=>{ S.qrtext=e.target.value; render(); });
 
 document.querySelectorAll('.side input[type=text],.side input[type=email],.side input[type=tel]')
@@ -774,7 +976,6 @@ $('randomize').onclick = ()=>{
   applyStyle(sk[Math.floor(Math.random()*sk.length)]);
 };
 
-/* Speichern / Laden */
 $('saveTpl').onclick = ()=>{
   try{ localStorage.setItem('vk_data', JSON.stringify({d:data(),s:S}));
        toast('Gespeichert'); }catch(e){ toast('Speichern nicht möglich'); }
@@ -807,20 +1008,121 @@ function ready(needPdf){
   }
   return true;
 }
+/* Erst wenn jedes Bild wirklich dekodiert ist, darf html2canvas loslegen –
+   sonst landen QR-Code oder Logo als leere Fläche im PDF. */
+async function waitImages(el){
+  const imgs=[...el.querySelectorAll('img')];
+  await Promise.all(imgs.map(i=>{
+    if(i.complete && i.naturalWidth>0) return i.decode ? i.decode().catch(()=>{}) : Promise.resolve();
+    return new Promise(res=>{
+      const fertig=()=>res();
+      i.addEventListener('load',fertig,{once:true});
+      i.addEventListener('error',fertig,{once:true});
+      setTimeout(fertig,4000);
+    });
+  }));
+  if(document.fonts && document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+}
+/* Wo sitzt der QR-Code auf der Karte? Anteilig gemessen, damit es für jede Größe passt. */
+function qrRects(el){
+  const c = el.getBoundingClientRect();
+  if(!c.width || !c.height) return [];
+  const rel = r => ({x:(r.left-c.left)/c.width, y:(r.top-c.top)/c.height,
+                     w:r.width/c.width, h:r.height/c.height});
+  return [...el.querySelectorAll('.qrbox')].map(box=>{
+    const img = box.querySelector('img'); if(!img) return null;
+    return {box:rel(box.getBoundingClientRect()), img:rel(img.getBoundingClientRect()),
+            src:img.src, model:qrModell.model};
+  }).filter(Boolean);
+}
+/* Den QR nachträglich selbst ins Bild zeichnen. html2canvas lässt ihn bei lokal
+   geöffneten Dateien gern aus – so hängt das Ergebnis nicht mehr davon ab. */
+async function compositeQRs(cv, qrs){
+  if(!qrs.length) return;
+  const ctx = cv.getContext('2d');
+  const px = (v,ganz)=>Math.round(v*ganz);
+  for(const q of qrs){
+    // weiße Grundfläche
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(px(q.box.x,cv.width), px(q.box.y,cv.height),
+                 px(q.box.w,cv.width), px(q.box.h,cv.height));
+
+    const ix=px(q.img.x,cv.width), iy=px(q.img.y,cv.height), iw=px(q.img.w,cv.width);
+
+    // Weg 1: direkt aus dem Rastermodell zeichnen – braucht kein Bild
+    if(q.model){
+      const n=q.model.getModuleCount(), cell=iw/n;
+      ctx.fillStyle='#000000';
+      for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+        if(!q.model.isDark(r,c)) continue;
+        const x0=Math.round(ix+c*cell), x1=Math.round(ix+(c+1)*cell);
+        const y0=Math.round(iy+r*cell), y1=Math.round(iy+(r+1)*cell);
+        ctx.fillRect(x0,y0,x1-x0,y1-y0);     // lückenlos, ohne Graukanten
+      }
+      continue;
+    }
+    // Weg 2: notfalls doch über das Bild
+    if(!q.src) continue;
+    const im = new Image(); im.src = q.src;
+    try{ if(im.decode) await im.decode(); }catch(e){ continue; }
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(im, ix, iy, iw, px(q.img.h,cv.height));
+  }
+}
 async function shoot(el){
+  const qrs = qrRects(el);            // im aktuellen Zustand messen
+  await waitImages(el);
   el.classList.add('exporting');
-  const cv = await html2canvas(el,{scale:SCALE,backgroundColor:null,logging:false,useCORS:true});
+  const cv = await html2canvas(el,{scale:SCALE,backgroundColor:null,logging:false,
+    useCORS:true, allowTaint:true, imageTimeout:0});
   el.classList.remove('exporting');
+  await compositeQRs(cv, qrs);
   return cv.toDataURL('image/png');
 }
-/* Aufnahme ohne Beschnitt: exakt 85x55 mm (425x275 px) – für den A4-Bogen */
+/* Kontrolle: enthält die Aufnahme überhaupt etwas außer Weiß an der QR-Stelle? */
+function qrVorhanden(el){
+  return !S.qrOn || !!el.querySelector('.qrbox img');
+}
+/* Der QR wandert als echte Rechtecke ins PDF – kein Bild, keine Bildbibliothek.
+   Waagerecht zusammenhängende Module werden zu einem Balken verschmolzen,
+   das hält die Datei klein und verhindert Haarlinien zwischen den Kästchen. */
+function drawQRVector(pdf, qrs, x, y, w, h){
+  if(!qrs || !qrs.length) return 0;
+  let gezeichnet = 0;
+  qrs.forEach(q=>{
+    pdf.setFillColor(255,255,255);
+    pdf.rect(x+q.box.x*w, y+q.box.y*h, q.box.w*w, q.box.h*h, 'F');
+    if(!q.model) return;
+    const n = q.model.getModuleCount();
+    const ix = x+q.img.x*w, iy = y+q.img.y*h, cell = (q.img.w*w)/n;
+    const ue = cell*0.03;                       // winzige Überlappung gegen Fugen
+    pdf.setFillColor(0,0,0);
+    for(let r=0;r<n;r++){
+      let c=0;
+      while(c<n){
+        if(q.model.isDark(r,c)){
+          let c2=c; while(c2+1<n && q.model.isDark(r,c2+1)) c2++;
+          pdf.rect(ix+c*cell, iy+r*cell, (c2-c+1)*cell+ue, cell+ue, 'F');
+          gezeichnet++; c=c2+1;
+        } else c++;
+      }
+    }
+  });
+  return gezeichnet;
+}
 async function shootTrim(el){
   const w=el.style.width, h=el.style.height, b=el.style.getPropertyValue('--bleed');
   el.style.width='425px'; el.style.height='275px'; el.style.setProperty('--bleed','0px');
+  const qrs = qrRects(el);                 // im getrimmten Zustand messen
   const url = await shoot(el);
   el.style.width=w; el.style.height=h;
   if(b) el.style.setProperty('--bleed',b); else el.style.removeProperty('--bleed');
-  return url;
+  return {url,qrs};
+}
+async function shootFull(el){
+  const qrs = qrRects(el);
+  const url = await shoot(el);
+  return {url,qrs};
 }
 function fname(ext){
   const d=data(); const n=(d.vorname+'-'+d.nachname).replace(/[^a-z0-9\-]/gi,'')||'visitenkarte';
@@ -840,11 +1142,18 @@ $('pdf1').onclick = async ()=>{
   toast('PDF wird erstellt …');
   const {jsPDF} = window.jspdf;
   const pdf = new jsPDF({orientation:'landscape',unit:'mm',format:[91,61]});
-  pdf.addImage(await shoot($('cardFront')),'PNG',0,0,91,61,undefined,'FAST');
-  if(S.back){ pdf.addPage([91,61],'landscape');
-    pdf.addImage(await shoot($('cardBack')),'PNG',0,0,91,61,undefined,'FAST'); }
+  const vorn = await shootFull($('cardFront'));
+  pdf.addImage(vorn.url,'PNG',0,0,91,61,undefined,'FAST');
+  let mod = drawQRVector(pdf, vorn.qrs, 0,0,91,61);
+  if(S.back){
+    pdf.addPage([91,61],'landscape');
+    const hinten = await shootFull($('cardBack'));
+    pdf.addImage(hinten.url,'PNG',0,0,91,61,undefined,'FAST');
+    mod += drawQRVector(pdf, hinten.qrs, 0,0,91,61);
+  }
   pdf.save(fname('pdf'));
-  toast('PDF gespeichert – 85×55 mm + 3 mm Beschnitt');
+  toast(mod>0 ? 'PDF gespeichert – QR als Vektor eingesetzt'
+              : 'PDF gespeichert – 85×55 mm + 3 mm Beschnitt');
 };
 
 $('pdf10').onclick = async ()=>{
@@ -855,11 +1164,14 @@ $('pdf10').onclick = async ()=>{
   const ausricht = L.quer?'landscape':'portrait';
   const pdf = new jsPDF({orientation:ausricht,unit:'mm',format:'a4'});
   const {W,H,g,cols,rows,ox,oy,pw,ph,n} = L;
-  // Ohne Abstand würden Eckmarken über die Nachbarkarte laufen
   const mode = (S.cutmode==='marks' && g===0) ? 'lines' : S.cutmode;
-  const place = (img)=>{
-    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++)
-      pdf.addImage(img,'PNG',ox+c*(W+g),oy+r*(H+g),W,H,undefined,'FAST');
+  let module = 0;
+  const place = (img,qrs)=>{
+    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+      const x=ox+c*(W+g), y=oy+r*(H+g);
+      pdf.addImage(img,'PNG',x,y,W,H,undefined,'FAST');
+      module += drawQRVector(pdf, qrs, x, y, W, H);
+    }
     if(mode==='none') return;
     pdf.setDrawColor(140); pdf.setLineWidth(0.08);
     if(mode==='lines'){
@@ -878,17 +1190,23 @@ $('pdf10').onclick = async ()=>{
       }
     }
   };
-  place(await shootTrim($('cardFront')));
-  if(S.back){ pdf.addPage('a4',ausricht); place(await shootTrim($('cardBack'))); }
+  const vorn = await shootTrim($('cardFront'));
+  place(vorn.url, vorn.qrs);
+  if(S.back){
+    pdf.addPage('a4',ausricht);
+    const hinten = await shootTrim($('cardBack'));
+    place(hinten.url, hinten.qrs);
+  }
   pdf.save('visitenkarten-a4-bogen.pdf');
-  toast(`A4-Bogen gespeichert – ${n} Karten, ${g} mm Abstand`);
+  toast(`A4-Bogen gespeichert – ${n} Karten, ${g} mm Abstand`
+        + (module?` · QR als Vektor (${module} Balken)`:''));
 };
 
 /* ============================================================
    START
    ============================================================ */
-applyStyle('professionell');
-S.variant='sidebar'; syncControls(); render();
+$('styleHint').textContent = STYLES[S.style].h;
+syncControls(); render();
 </script>
 </body>
 </html>
